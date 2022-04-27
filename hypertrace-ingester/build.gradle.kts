@@ -17,7 +17,7 @@ application {
 
 hypertraceDocker {
   defaultImage {
-    imageName.set("hypertrace-service")
+    imageName.set("hypertrace-ingester")
     javaApplication {
       serviceName.set("${project.name}")
       adminPort.set(8099)
@@ -118,10 +118,5 @@ tasks.register<Copy>("createCopySpecForSubJobTest") {
 }
 
 fun getCommitHash(): String {
-  val os = com.bmuschko.gradle.docker.shaded.org.apache.commons.io.output.ByteArrayOutputStream()
-  project.exec {
-    commandLine = "git rev-parse --verify HEAD".split(" ")
-    standardOutput = os
-  }
-  return String(os.toByteArray()).trim()
+  return System.getenv("COMMIT_SHA").toString()
 }
