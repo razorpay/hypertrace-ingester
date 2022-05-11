@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.avro.Schema;
@@ -96,18 +97,16 @@ public class JaegerSpanNormalizer {
           .normalize(jaegerSpan, tenantIdHandler.getTenantIdProvider().getTenantIdTagKey())
           .ifPresent(rawSpanBuilder::setResource);
 
-      // build raw span
-      RawSpan rawSpan = rawSpanBuilder.build();
-      if (LOG.isDebugEnabled()) {
-        logSpanConversion(jaegerSpan, rawSpan);
-      }
-
       // redact PII tags, tag comparisons are case insensitive
-      var attributeMap = rawSpan.getEvent().getAttributes().getAttributeMap();
+      var attributeMap = rawSpanBuilder.getEvent().getAttributes().getAttributeMap();
       Set<String> tagKeys = attributeMap.keySet();
+
+      AtomicReference<Boolean> containsPIIFields = new AtomicReference<>();
+      containsPIIFields.set(false);
 
       tagKeys.stream()
           .filter(tagKey -> tagsToRedact.contains(tagKey.toUpperCase()))
+          .peek(tagKey -> containsPIIFields.set(true))
           .forEach(
               tagKey ->
                   attributeMap.put(
@@ -115,6 +114,24 @@ public class JaegerSpanNormalizer {
                       AttributeValue.newBuilder()
                           .setValue(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL)
                           .build()));
+
+      // if the trace contains PII field, add a field to indicate this. We can later slice-and-dice
+      // based on this tag
+      if (containsPIIFields.get()) {
+        rawSpanBuilder
+            .getEvent()
+            .getAttributes()
+            .getAttributeMap()
+            .put(
+                SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY,
+                AttributeValue.newBuilder().setValue("true").build());
+      }
+
+      // build raw span
+      RawSpan rawSpan = rawSpanBuilder.build();
+      if (LOG.isDebugEnabled()) {
+        logSpanConversion(jaegerSpan, rawSpan);
+      }
 
       return rawSpan;
     };

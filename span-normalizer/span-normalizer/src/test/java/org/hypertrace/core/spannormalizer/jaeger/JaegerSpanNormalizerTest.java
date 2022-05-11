@@ -269,6 +269,9 @@ public class JaegerSpanNormalizerTest {
         SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("amount").getValue());
     Assertions.assertEquals(
         SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("authorization").getValue());
+    Assertions.assertTrue(attributes.containsKey(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY));
+    Assertions.assertEquals(
+        "true", attributes.get(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY).getValue());
   }
 
   @Test
@@ -316,5 +319,6 @@ public class JaegerSpanNormalizerTest {
     Assertions.assertEquals("GET", attributes.get("http.method").getValue());
     Assertions.assertEquals(2300, Integer.valueOf(attributes.get("amount").getValue()));
     Assertions.assertEquals("authToken", attributes.get("authorization").getValue());
+    Assertions.assertFalse(attributes.containsKey(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY));
   }
 }
