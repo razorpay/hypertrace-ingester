@@ -57,7 +57,7 @@ jobs:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
           fetch-depth: 0
-      
+
       - name: create checksum file
         uses: hypertrace/github-actions/checksum@main
 
@@ -75,10 +75,10 @@ jobs:
         with:
           username: ${{ secrets.PUBLIC_DOCKER_USERNAME }}
           password: ${{ secrets.PUBLIC_DOCKER_PASSWORD }}
-      
-     - name: Build with Gradle
+
+      - name: Build with Gradle
         uses: hypertrace/github-actions/gradle@main
-        with: 
+        with:
           args: build dockerBuildImages
         env:
           DOCKER_USERNAME: ${{ secrets.PUBLIC_DOCKER_USERNAME }}
@@ -86,30 +86,12 @@ jobs:
           tagLatest: false
           IMAGE_TAG: ${{ github.sha }}
           COMMIT_SHA: ${{ github.sha }}
-          
+
       - name: push docker image
         uses: hypertrace/github-actions/gradle@main
-        with: 
+        with:
           args: dockerPushImages
         env:
           DOCKER_USERNAME: ${{ secrets.PUBLIC_DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.PUBLIC_DOCKER_PASSWORD }}
-          COMMIT_SHA: ${{ github.sha }}     
-
-#   snyk-scan:
-#     runs-on: ubuntu-20.04
-#     steps:
-#     # Set fetch-depth: 0 to fetch commit history and tags for use in version calculation
-#       - name: Check out code
-#         uses: actions/checkout@v2.3.4
-#         with:
-#           ref: ${{github.event.pull_request.head.ref}}
-#           repository: ${{github.event.pull_request.head.repo.full_name}}
-#           fetch-depth: 0
-#       - name: Setup snyk
-#         uses: snyk/actions/setup@0.3.0
-#       - name: Snyk test
-#         run: snyk test --all-sub-projects --org=hypertrace --severity-threshold=low --policy-path=.snyk --configuration-matching='^runtimeClasspath$' --remote-repo-url='${{ github.server_url }}/${{ github.repository }}.git'
-#         env:
-#           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-#           GRADLE_OPTS: -Dorg.gradle.workers.max=1
+          COMMIT_SHA: ${{ github.sha }}
