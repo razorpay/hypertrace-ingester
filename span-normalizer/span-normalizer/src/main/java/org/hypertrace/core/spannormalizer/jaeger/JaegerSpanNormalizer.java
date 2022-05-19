@@ -3,7 +3,6 @@ package org.hypertrace.core.spannormalizer.jaeger;
 import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
 import static org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry.registerCounter;
 
-import com.esotericsoftware.minlog.Log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.util.Timestamps;
