@@ -64,16 +64,14 @@ public class JaegerSpanNormalizer {
   public static final String OLD_JAEGER_SERVICENAME_KEY = "jaeger.servicename";
 
   private static final String SPAN_NORMALIZATION_TIME_METRIC = "span.normalization.time";
-
   private static final String SPAN_REDACTED_ATTRIBUTES_COUNTER = "span.redacted.attributes";
-  private final ConcurrentMap<String, Counter> spanAttributesRedactedCounters = new ConcurrentHashMap<>();
+  private final ConcurrentMap<String, Counter> spanAttributesRedactedCounters =
+      new ConcurrentHashMap<>();
+  private final ConcurrentMap<String, Pattern> regexPatternMap = new ConcurrentHashMap<>();
 
   private static JaegerSpanNormalizer INSTANCE;
   private final ConcurrentMap<String, Timer> tenantToSpanNormalizationTimer =
       new ConcurrentHashMap<>();
-
-  private final ConcurrentMap<String, Pattern> regexPatternMap =
-          new ConcurrentHashMap<>();
 
   private final JaegerResourceNormalizer resourceNormalizer = new JaegerResourceNormalizer();
   private final TenantIdHandler tenantIdHandler;
@@ -97,14 +95,19 @@ public class JaegerSpanNormalizer {
           .map(String::toUpperCase)
           .forEach(tagKeysToRedact::add);
     }
-    if(config.hasPath(SpanNormalizerConstants.PII_REGEX_CONFIG_KEY)) {
-      tagRegexPatternToRedact.addAll(config.getStringList(SpanNormalizerConstants.PII_REGEX_CONFIG_KEY));
+    if (config.hasPath(SpanNormalizerConstants.PII_REGEX_CONFIG_KEY)) {
+      tagRegexPatternToRedact.addAll(
+          config.getStringList(SpanNormalizerConstants.PII_REGEX_CONFIG_KEY));
     }
     this.tenantIdHandler = new TenantIdHandler(config);
   }
 
   public Timer getSpanNormalizationTimer(String tenantId) {
     return tenantToSpanNormalizationTimer.get(tenantId);
+  }
+
+  public ConcurrentMap<String, Counter> getSpanAttributesRedactedCounters() {
+    return spanAttributesRedactedCounters;
   }
 
   @Nullable
@@ -167,42 +170,51 @@ public class JaegerSpanNormalizer {
 
       try {
         tagKeys.stream()
-                .filter(tagKey -> tagKeysToRedact.contains(tagKey.toUpperCase()))
-                .peek(tagKey -> containsPIIFields.set(true))
-                .forEach(
-                        tagKey -> {
-                          spanAttributesRedactedCounters
-                                  .computeIfAbsent(MatchType.KEY.toString(), k -> registerCounter(SPAN_REDACTED_ATTRIBUTES_COUNTER,
-                                          Map.of("matchType", MatchType.KEY.toString())))
-                                  .increment();
-                          logSpanRedaction(tagKey, MatchType.KEY);
-                          attributeMap.put(
-                                  tagKey,
-                                  AttributeValue.newBuilder()
-                                          .setValue(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL)
-                                          .build());
-                        });
+            .filter(tagKey -> tagKeysToRedact.contains(tagKey.toUpperCase()))
+            .peek(tagKey -> containsPIIFields.set(true))
+            .forEach(
+                tagKey -> {
+                  spanAttributesRedactedCounters
+                      .computeIfAbsent(
+                          MatchType.KEY.toString(),
+                          k ->
+                              registerCounter(
+                                  SPAN_REDACTED_ATTRIBUTES_COUNTER,
+                                  Map.of("matchType", MatchType.KEY.toString())))
+                      .increment();
+                  logSpanRedaction(tagKey, MatchType.KEY);
+                  attributeMap.put(
+                      tagKey,
+                      AttributeValue.newBuilder()
+                          .setValue(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL)
+                          .build());
+                });
       } catch (Exception e) {
         LOG.error("An exception occurred while sanitising spans with key match: ", e);
       }
 
       try {
-          for(String regexPattern : tagRegexPatternToRedact) {
-            Pattern pattern = regexPatternMap.computeIfAbsent(regexPattern, k -> Pattern.compile(regexPattern));
-            for(String tagKey : tagKeys) {
-              if(pattern.matcher(attributeMap.get(tagKey).getValue()).matches()) {
-                containsPIIFields.set(true);
-                spanAttributesRedactedCounters
-                        .computeIfAbsent(MatchType.REGEX.toString(), k -> registerCounter(SPAN_REDACTED_ATTRIBUTES_COUNTER,
-                                Map.of("matchType", MatchType.REGEX.toString())))
-                        .increment();
-                logSpanRedaction(tagKey, MatchType.REGEX);
-                attributeMap.put(
-                        tagKey,
-                        AttributeValue.newBuilder()
-                                .setValue(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL)
-                                .build());
-              }
+        for (String regexPattern : tagRegexPatternToRedact) {
+          Pattern pattern =
+              regexPatternMap.computeIfAbsent(regexPattern, k -> Pattern.compile(regexPattern));
+          for (String tagKey : tagKeys) {
+            if (pattern.matcher(attributeMap.get(tagKey).getValue()).matches()) {
+              containsPIIFields.set(true);
+              spanAttributesRedactedCounters
+                  .computeIfAbsent(
+                      MatchType.REGEX.toString(),
+                      k ->
+                          registerCounter(
+                              SPAN_REDACTED_ATTRIBUTES_COUNTER,
+                              Map.of("matchType", MatchType.REGEX.toString())))
+                  .increment();
+              logSpanRedaction(tagKey, MatchType.REGEX);
+              attributeMap.put(
+                  tagKey,
+                  AttributeValue.newBuilder()
+                      .setValue(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL)
+                      .build());
+            }
           }
         }
       } catch (Exception e) {
@@ -213,28 +225,32 @@ public class JaegerSpanNormalizer {
       // based on this tag
       if (containsPIIFields.get()) {
         rawSpanBuilder
-                .getEvent()
-                .getAttributes()
-                .getAttributeMap()
-                .put(
-                        SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY,
-                        AttributeValue.newBuilder().setValue("true").build());
+            .getEvent()
+            .getAttributes()
+            .getAttributeMap()
+            .put(
+                SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY,
+                AttributeValue.newBuilder().setValue("true").build());
       }
     } catch (Exception e) {
       LOG.error("An exception occurred while sanitising spans: ", e);
     }
-
   }
 
   private void logSpanRedaction(String tagKey, MatchType matchType) {
     try {
-      if(LOG.isDebugEnabled()) {
+      if (LOG.isDebugEnabled()) {
         LOG.debug(
-                new ObjectMapper()
-                        .writerWithDefaultPrettyPrinter()
-                        .writeValueAsString(Map.of("bookmark", "REDACTED_KEY",
-                                "key", tagKey,
-                                "matchtype", matchType.toString())));
+            new ObjectMapper()
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(
+                    Map.of(
+                        "bookmark",
+                        "REDACTED_KEY",
+                        "key",
+                        tagKey,
+                        "matchtype",
+                        matchType.toString())));
       }
     } catch (Exception e) {
       LOG.error("An exception occurred while logging span redaction: ", e);

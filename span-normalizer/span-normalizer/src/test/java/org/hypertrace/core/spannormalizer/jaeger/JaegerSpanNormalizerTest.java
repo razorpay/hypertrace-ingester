@@ -7,6 +7,7 @@ import com.typesafe.config.ConfigFactory;
 import io.jaegertracing.api_v2.JaegerSpanInternalModel.KeyValue;
 import io.jaegertracing.api_v2.JaegerSpanInternalModel.Process;
 import io.jaegertracing.api_v2.JaegerSpanInternalModel.Span;
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentMap;
 import org.hypertrace.core.datamodel.AttributeValue;
 import org.hypertrace.core.datamodel.RawSpan;
 import org.hypertrace.core.serviceframework.config.ConfigClientFactory;
@@ -22,6 +24,7 @@ import org.hypertrace.core.span.constants.RawSpanConstants;
 import org.hypertrace.core.span.constants.v1.JaegerAttribute;
 import org.hypertrace.core.spannormalizer.SpanNormalizer;
 import org.hypertrace.core.spannormalizer.constants.SpanNormalizerConstants;
+import org.hypertrace.core.spannormalizer.jaeger.tenant.MatchType;
 import org.hypertrace.core.spannormalizer.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -82,8 +85,8 @@ public class JaegerSpanNormalizerTest {
         Map.of("schema.registry.url", "http://localhost:8081"),
         "pii.keys",
         List.of("http.method", "http.url", "amount", "Authorization"),
-            "pii.regex",
-            List.of("^(?:(?:\\+|0{0,2})91(\\s*[\\-]\\s*)?|[0]?)?[789]\\d{9}$"));
+        "pii.regex",
+        List.of("^(?:(?:\\+|0{0,2})91(\\s*[\\-]\\s*)?|[0]?)?[789]\\d{9}$"));
   }
 
   @Test
@@ -251,15 +254,16 @@ public class JaegerSpanNormalizerTest {
             .addTags(2, KeyValue.newBuilder().setKey("kind").setVStr("client"))
             .addTags(3, KeyValue.newBuilder().setKey("authorization").setVStr("authToken").build())
             .addTags(4, KeyValue.newBuilder().setKey("amount").setVInt64(2300).build())
-                .addTags(5, KeyValue.newBuilder().setKey("phoneNum").setVStr("+919123456780").build())
-                .addTags(5, KeyValue.newBuilder().setKey("phoneNum1").setVStr("7123456980").build())
-                .addTags(5, KeyValue.newBuilder().setKey("phoneNum2").setVStr("+1234567890").build())
-                .addTags(5, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
+            .addTags(5, KeyValue.newBuilder().setKey("phoneNum").setVStr("+919123456780").build())
+            .addTags(5, KeyValue.newBuilder().setKey("phoneNum1").setVStr("7123456980").build())
+            .addTags(5, KeyValue.newBuilder().setKey("phoneNum2").setVStr("+1234567890").build())
+            .addTags(5, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
             .build();
 
     RawSpan rawSpan = normalizer.convert(tenantId, span);
 
     var attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
+    ConcurrentMap<String, Counter> counterMap = normalizer.getSpanAttributesRedactedCounters();
 
     Assertions.assertEquals("client", attributes.get("kind").getValue());
     Assertions.assertEquals(
@@ -271,13 +275,14 @@ public class JaegerSpanNormalizerTest {
     Assertions.assertEquals(
         SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("authorization").getValue());
     Assertions.assertEquals(
-            SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("phonenum").getValue());
+        SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("phonenum").getValue());
     Assertions.assertEquals(
-            SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("phonenum1").getValue());
-    Assertions.assertEquals(
-            "+1234567890", attributes.get("phonenum2").getValue());
-    Assertions.assertEquals(
-            "123456789", attributes.get("phonenum3").getValue());
+        SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("phonenum1").getValue());
+    Assertions.assertEquals("+1234567890", attributes.get("phonenum2").getValue());
+    Assertions.assertEquals("123456789", attributes.get("phonenum3").getValue());
+    Assertions.assertEquals("123456789", attributes.get("phonenum3").getValue());
+    Assertions.assertEquals(4.0, counterMap.get(MatchType.KEY.toString()).count());
+    Assertions.assertEquals(2.0, counterMap.get(MatchType.REGEX.toString()).count());
     Assertions.assertTrue(attributes.containsKey(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY));
     Assertions.assertEquals(
         "true", attributes.get(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY).getValue());
@@ -316,29 +321,27 @@ public class JaegerSpanNormalizerTest {
             .addTags(2, TestUtils.createKeyValue("kind", "client"))
             .addTags(3, TestUtils.createKeyValue("authorization", "authToken"))
             .addTags(4, TestUtils.createKeyValue("amount", 2300))
-                .addTags(5, KeyValue.newBuilder().setKey("phoneNum").setVStr("+919123456780").build())
-                .addTags(5, KeyValue.newBuilder().setKey("phoneNum1").setVStr("7123456980").build())
-                .addTags(5, KeyValue.newBuilder().setKey("phoneNum2").setVStr("+1234567890").build())
-                .addTags(5, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
+            .addTags(5, KeyValue.newBuilder().setKey("phoneNum").setVStr("+919123456780").build())
+            .addTags(5, KeyValue.newBuilder().setKey("phoneNum1").setVStr("7123456980").build())
+            .addTags(5, KeyValue.newBuilder().setKey("phoneNum2").setVStr("+1234567890").build())
+            .addTags(5, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
             .build();
 
     RawSpan rawSpan = normalizer.convert(tenantId, span);
 
     var attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
+    ConcurrentMap<String, Counter> counterMap = normalizer.getSpanAttributesRedactedCounters();
 
     Assertions.assertEquals("client", attributes.get("kind").getValue());
     Assertions.assertEquals("hypertrace.org", attributes.get("http.url").getValue());
     Assertions.assertEquals("GET", attributes.get("http.method").getValue());
     Assertions.assertEquals(2300, Integer.valueOf(attributes.get("amount").getValue()));
     Assertions.assertEquals("authToken", attributes.get("authorization").getValue());
-    Assertions.assertEquals(
-            "+919123456780", attributes.get("phonenum").getValue());
-    Assertions.assertEquals(
-            "7123456980", attributes.get("phonenum1").getValue());
-    Assertions.assertEquals(
-            "+1234567890", attributes.get("phonenum2").getValue());
-    Assertions.assertEquals(
-            "123456789", attributes.get("phonenum3").getValue());
+    Assertions.assertEquals("+919123456780", attributes.get("phonenum").getValue());
+    Assertions.assertEquals("7123456980", attributes.get("phonenum1").getValue());
+    Assertions.assertEquals("+1234567890", attributes.get("phonenum2").getValue());
+    Assertions.assertEquals("123456789", attributes.get("phonenum3").getValue());
+    Assertions.assertTrue(counterMap.isEmpty());
     Assertions.assertFalse(attributes.containsKey(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY));
   }
 }
