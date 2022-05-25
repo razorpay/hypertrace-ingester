@@ -25,7 +25,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
