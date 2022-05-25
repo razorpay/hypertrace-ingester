@@ -258,6 +258,7 @@ public class JaegerSpanNormalizerTest {
             .addTags(5, KeyValue.newBuilder().setKey("phoneNum1").setVStr("7123456980").build())
             .addTags(5, KeyValue.newBuilder().setKey("phoneNum2").setVStr("+1234567890").build())
             .addTags(5, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
+                .addTags(5, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
             .build();
 
     RawSpan rawSpan = normalizer.convert(tenantId, span);
@@ -281,11 +282,30 @@ public class JaegerSpanNormalizerTest {
     Assertions.assertEquals("+1234567890", attributes.get("phonenum2").getValue());
     Assertions.assertEquals("123456789", attributes.get("phonenum3").getValue());
     Assertions.assertEquals("123456789", attributes.get("phonenum3").getValue());
-    Assertions.assertEquals(4.0, counterMap.get(PIIMatchType.KEY.toString()).count());
+    Assertions.assertEquals(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("otp").getValue());
+    Assertions.assertEquals(5.0, counterMap.get(PIIMatchType.KEY.toString()).count());
     Assertions.assertEquals(2.0, counterMap.get(PIIMatchType.REGEX.toString()).count());
     Assertions.assertTrue(attributes.containsKey(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY));
     Assertions.assertEquals(
         "true", attributes.get(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY).getValue());
+
+
+    span =
+            Span.newBuilder()
+                    .setProcess(process)
+                    .addTags(0, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
+                    .build();
+
+    rawSpan = normalizer.convert(tenantId, span);
+    attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
+    counterMap = normalizer.getSpanAttributesRedactedCounters();
+
+    Assertions.assertEquals(6.0, counterMap.get(PIIMatchType.KEY.toString()).count());
+    Assertions.assertEquals(2.0, counterMap.get(PIIMatchType.REGEX.toString()).count());
+    Assertions.assertEquals(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("otp").getValue());
+    Assertions.assertEquals(
+            "true", attributes.get(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY).getValue());
+
   }
 
   @Test
