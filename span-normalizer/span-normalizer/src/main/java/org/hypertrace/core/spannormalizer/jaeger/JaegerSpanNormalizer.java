@@ -93,13 +93,13 @@ public class JaegerSpanNormalizer {
     try {
       if (config.hasPath(SpanNormalizerConstants.PII_KEYS_CONFIG_KEY)) {
         config.getStringList(SpanNormalizerConstants.PII_KEYS_CONFIG_KEY).stream()
-                .map(String::toUpperCase)
-                .forEach(tagKeysToRedact::add);
+            .map(String::toUpperCase)
+            .forEach(tagKeysToRedact::add);
       }
       if (config.hasPath(SpanNormalizerConstants.PII_REGEX_CONFIG_KEY)) {
-        config.getStringList(SpanNormalizerConstants.PII_REGEX_CONFIG_KEY).stream().
-                map(Pattern::compile).
-                forEach(tagRegexPatternToRedact::add);
+        config.getStringList(SpanNormalizerConstants.PII_REGEX_CONFIG_KEY).stream()
+            .map(Pattern::compile)
+            .forEach(tagRegexPatternToRedact::add);
       }
     } catch (Exception e) {
       LOG.error("An exception occurred while loading redaction configs: ", e);
@@ -175,8 +175,13 @@ public class JaegerSpanNormalizer {
 
       try {
         tagKeys.stream()
-            .filter(tagKey -> tagKeysToRedact.contains(tagKey.toUpperCase()) ||
-                    attributeMap.get(tagKey).getValue().equals(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL))
+            .filter(
+                tagKey ->
+                    tagKeysToRedact.contains(tagKey.toUpperCase())
+                        || attributeMap
+                            .get(tagKey)
+                            .getValue()
+                            .equals(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL))
             .peek(tagKey -> containsPIIFields.set(true))
             .forEach(
                 tagKey -> {
@@ -190,13 +195,12 @@ public class JaegerSpanNormalizer {
                       .increment();
                   logSpanRedaction(tagKey, PIIMatchType.KEY);
                   if (redactedAttributeValue == null) {
-                    redactedAttributeValue = AttributeValue.newBuilder()
+                    redactedAttributeValue =
+                        AttributeValue.newBuilder()
                             .setValue(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL)
                             .build();
                   }
-                  attributeMap.put(
-                      tagKey,
-                          redactedAttributeValue);
+                  attributeMap.put(tagKey, redactedAttributeValue);
                 });
       } catch (Exception e) {
         LOG.error("An exception occurred while sanitising spans with key match: ", e);
@@ -217,13 +221,12 @@ public class JaegerSpanNormalizer {
                   .increment();
               logSpanRedaction(tagKey, PIIMatchType.REGEX);
               if (redactedAttributeValue == null) {
-                redactedAttributeValue = AttributeValue.newBuilder()
+                redactedAttributeValue =
+                    AttributeValue.newBuilder()
                         .setValue(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL)
                         .build();
               }
-              attributeMap.put(
-                  tagKey,
-                      redactedAttributeValue);
+              attributeMap.put(tagKey, redactedAttributeValue);
             }
           }
         }

@@ -255,10 +255,10 @@ public class JaegerSpanNormalizerTest {
             .addTags(3, KeyValue.newBuilder().setKey("authorization").setVStr("authToken").build())
             .addTags(4, KeyValue.newBuilder().setKey("amount").setVInt64(2300).build())
             .addTags(5, KeyValue.newBuilder().setKey("phoneNum").setVStr("+919123456780").build())
-            .addTags(5, KeyValue.newBuilder().setKey("phoneNum1").setVStr("7123456980").build())
-            .addTags(5, KeyValue.newBuilder().setKey("phoneNum2").setVStr("+1234567890").build())
-            .addTags(5, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
-                .addTags(5, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
+            .addTags(6, KeyValue.newBuilder().setKey("phoneNum1").setVStr("7123456980").build())
+            .addTags(7, KeyValue.newBuilder().setKey("phoneNum2").setVStr("+1234567890").build())
+            .addTags(8, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
+            .addTags(9, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
             .build();
 
     RawSpan rawSpan = normalizer.convert(tenantId, span);
@@ -282,19 +282,19 @@ public class JaegerSpanNormalizerTest {
     Assertions.assertEquals("+1234567890", attributes.get("phonenum2").getValue());
     Assertions.assertEquals("123456789", attributes.get("phonenum3").getValue());
     Assertions.assertEquals("123456789", attributes.get("phonenum3").getValue());
-    Assertions.assertEquals(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("otp").getValue());
+    Assertions.assertEquals(
+        SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("otp").getValue());
     Assertions.assertEquals(5.0, counterMap.get(PIIMatchType.KEY.toString()).count());
     Assertions.assertEquals(2.0, counterMap.get(PIIMatchType.REGEX.toString()).count());
     Assertions.assertTrue(attributes.containsKey(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY));
     Assertions.assertEquals(
         "true", attributes.get(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY).getValue());
 
-
     span =
-            Span.newBuilder()
-                    .setProcess(process)
-                    .addTags(0, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
-                    .build();
+        Span.newBuilder()
+            .setProcess(process)
+            .addTags(0, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
+            .build();
 
     rawSpan = normalizer.convert(tenantId, span);
     attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
@@ -302,10 +302,10 @@ public class JaegerSpanNormalizerTest {
 
     Assertions.assertEquals(6.0, counterMap.get(PIIMatchType.KEY.toString()).count());
     Assertions.assertEquals(2.0, counterMap.get(PIIMatchType.REGEX.toString()).count());
-    Assertions.assertEquals(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("otp").getValue());
     Assertions.assertEquals(
-            "true", attributes.get(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY).getValue());
-
+        SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("otp").getValue());
+    Assertions.assertEquals(
+        "true", attributes.get(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY).getValue());
   }
 
   @Test
@@ -342,9 +342,9 @@ public class JaegerSpanNormalizerTest {
             .addTags(3, TestUtils.createKeyValue("authorization", "authToken"))
             .addTags(4, TestUtils.createKeyValue("amount", 2300))
             .addTags(5, KeyValue.newBuilder().setKey("phoneNum").setVStr("+919123456780").build())
-            .addTags(5, KeyValue.newBuilder().setKey("phoneNum1").setVStr("7123456980").build())
-            .addTags(5, KeyValue.newBuilder().setKey("phoneNum2").setVStr("+1234567890").build())
-            .addTags(5, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
+            .addTags(6, KeyValue.newBuilder().setKey("phoneNum1").setVStr("7123456980").build())
+            .addTags(7, KeyValue.newBuilder().setKey("phoneNum2").setVStr("+1234567890").build())
+            .addTags(8, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
             .build();
 
     RawSpan rawSpan = normalizer.convert(tenantId, span);
