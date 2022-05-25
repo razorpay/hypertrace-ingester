@@ -24,7 +24,7 @@ import org.hypertrace.core.span.constants.RawSpanConstants;
 import org.hypertrace.core.span.constants.v1.JaegerAttribute;
 import org.hypertrace.core.spannormalizer.SpanNormalizer;
 import org.hypertrace.core.spannormalizer.constants.SpanNormalizerConstants;
-import org.hypertrace.core.spannormalizer.jaeger.tenant.MatchType;
+import org.hypertrace.core.spannormalizer.jaeger.tenant.PIIMatchType;
 import org.hypertrace.core.spannormalizer.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -281,8 +281,8 @@ public class JaegerSpanNormalizerTest {
     Assertions.assertEquals("+1234567890", attributes.get("phonenum2").getValue());
     Assertions.assertEquals("123456789", attributes.get("phonenum3").getValue());
     Assertions.assertEquals("123456789", attributes.get("phonenum3").getValue());
-    Assertions.assertEquals(4.0, counterMap.get(MatchType.KEY.toString()).count());
-    Assertions.assertEquals(2.0, counterMap.get(MatchType.REGEX.toString()).count());
+    Assertions.assertEquals(4.0, counterMap.get(PIIMatchType.KEY.toString()).count());
+    Assertions.assertEquals(2.0, counterMap.get(PIIMatchType.REGEX.toString()).count());
     Assertions.assertTrue(attributes.containsKey(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY));
     Assertions.assertEquals(
         "true", attributes.get(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY).getValue());
