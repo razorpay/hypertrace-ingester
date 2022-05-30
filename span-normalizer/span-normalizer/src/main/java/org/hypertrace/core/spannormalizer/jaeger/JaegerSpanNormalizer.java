@@ -179,6 +179,7 @@ public class JaegerSpanNormalizer {
 
     try {
       var attributeMap = rawSpanBuilder.getEvent().getAttributes().getAttributeMap();
+      var spanServiceName = rawSpanBuilder.getEvent().getServiceName();
       Set<String> tagKeys = attributeMap.keySet();
 
       AtomicReference<Boolean> containsPIIFields = new AtomicReference<>();
@@ -207,7 +208,7 @@ public class JaegerSpanNormalizer {
                 })
             .forEach(
                 tagKey -> {
-                  logSpanRedaction(tagKey, PIIMatchType.KEY);
+                  logSpanRedaction(tagKey, spanServiceName, PIIMatchType.KEY);
                   attributeMap.put(tagKey, redactedAttributeValue);
                 });
       } catch (Exception e) {
@@ -227,7 +228,7 @@ public class JaegerSpanNormalizer {
                               SPAN_REDACTED_ATTRIBUTES_COUNTER,
                               Map.of("matchType", PIIMatchType.REGEX.toString())))
                   .increment();
-              logSpanRedaction(tagKey, PIIMatchType.REGEX);
+              logSpanRedaction(tagKey, spanServiceName, PIIMatchType.REGEX);
               attributeMap.put(tagKey, redactedAttributeValue);
             }
           }
@@ -252,7 +253,7 @@ public class JaegerSpanNormalizer {
     }
   }
 
-  private void logSpanRedaction(String tagKey, PIIMatchType matchType) {
+  private void logSpanRedaction(String tagKey, String spanServiceName, PIIMatchType matchType) {
     try {
       if (LOG.isDebugEnabled()) {
         LOG.debug(
@@ -265,7 +266,10 @@ public class JaegerSpanNormalizer {
                         "key",
                         tagKey,
                         "matchtype",
-                        matchType.toString())));
+                        matchType.toString(),
+                            "serviceName",
+                            spanServiceName
+                            )));
       }
     } catch (Exception e) {
       LOG.error("An exception occurred while logging span redaction: ", e);
