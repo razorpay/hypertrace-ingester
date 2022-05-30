@@ -65,8 +65,7 @@ public class JaegerSpanNormalizer {
 
   private static final String SPAN_NORMALIZATION_TIME_METRIC = "span.normalization.time";
   private static final String SPAN_REDACTED_ATTRIBUTES_COUNTER = "span.redacted.attributes";
-  private final ConcurrentMap<String, Counter> spanAttributesRedactedCounters =
-      new ConcurrentHashMap<>();
+  private final Map<String, Counter> spanAttributesRedactedCounters = new ConcurrentHashMap<>();
 
   private static JaegerSpanNormalizer INSTANCE;
   private final ConcurrentMap<String, Timer> tenantToSpanNormalizationTimer =
@@ -95,11 +94,21 @@ public class JaegerSpanNormalizer {
         config.getStringList(SpanNormalizerConstants.PII_KEYS_CONFIG_KEY).stream()
             .map(String::toUpperCase)
             .forEach(tagKeysToRedact::add);
+        redactedAttributeValue =
+            AttributeValue.newBuilder()
+                .setValue(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL)
+                .build();
       }
       if (config.hasPath(SpanNormalizerConstants.PII_REGEX_CONFIG_KEY)) {
         config.getStringList(SpanNormalizerConstants.PII_REGEX_CONFIG_KEY).stream()
             .map(Pattern::compile)
             .forEach(tagRegexPatternToRedact::add);
+        if (redactedAttributeValue == null) {
+          redactedAttributeValue =
+              AttributeValue.newBuilder()
+                  .setValue(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL)
+                  .build();
+        }
       }
     } catch (Exception e) {
       LOG.error("An exception occurred while loading redaction configs: ", e);
@@ -111,7 +120,7 @@ public class JaegerSpanNormalizer {
     return tenantToSpanNormalizationTimer.get(tenantId);
   }
 
-  public ConcurrentMap<String, Counter> getSpanAttributesRedactedCounters() {
+  public Map<String, Counter> getSpanAttributesRedactedCounters() {
     return spanAttributesRedactedCounters;
   }
 
@@ -182,9 +191,9 @@ public class JaegerSpanNormalizer {
                             .get(tagKey)
                             .getValue()
                             .equals(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL))
-            .peek(tagKey -> containsPIIFields.set(true))
-            .forEach(
+            .peek(
                 tagKey -> {
+                  containsPIIFields.set(true);
                   spanAttributesRedactedCounters
                       .computeIfAbsent(
                           PIIMatchType.KEY.toString(),
@@ -193,13 +202,10 @@ public class JaegerSpanNormalizer {
                                   SPAN_REDACTED_ATTRIBUTES_COUNTER,
                                   Map.of("matchType", PIIMatchType.KEY.toString())))
                       .increment();
+                })
+            .forEach(
+                tagKey -> {
                   logSpanRedaction(tagKey, PIIMatchType.KEY);
-                  if (redactedAttributeValue == null) {
-                    redactedAttributeValue =
-                        AttributeValue.newBuilder()
-                            .setValue(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL)
-                            .build();
-                  }
                   attributeMap.put(tagKey, redactedAttributeValue);
                 });
       } catch (Exception e) {
@@ -220,12 +226,6 @@ public class JaegerSpanNormalizer {
                               Map.of("matchType", PIIMatchType.REGEX.toString())))
                   .increment();
               logSpanRedaction(tagKey, PIIMatchType.REGEX);
-              if (redactedAttributeValue == null) {
-                redactedAttributeValue =
-                    AttributeValue.newBuilder()
-                        .setValue(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL)
-                        .build();
-              }
               attributeMap.put(tagKey, redactedAttributeValue);
             }
           }
