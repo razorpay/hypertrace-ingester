@@ -161,7 +161,7 @@ public class JaegerSpanNormalizer {
           .ifPresent(rawSpanBuilder::setResource);
 
       // redact PII tags, tag comparisons are case insensitive (Resource tags are skipped)
-      if(redactedAttributeValue != null) {
+      if (redactedAttributeValue != null) {
         sanitiseSpan(rawSpanBuilder);
       }
 
@@ -267,9 +267,8 @@ public class JaegerSpanNormalizer {
                         tagKey,
                         "matchtype",
                         matchType.toString(),
-                            "serviceName",
-                            spanServiceName
-                            )));
+                        "serviceName",
+                        spanServiceName)));
       }
     } catch (Exception e) {
       LOG.error("An exception occurred while logging span redaction: ", e);

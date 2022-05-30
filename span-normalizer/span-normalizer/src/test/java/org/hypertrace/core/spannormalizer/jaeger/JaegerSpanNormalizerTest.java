@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentMap;
 import org.hypertrace.core.datamodel.AttributeValue;
 import org.hypertrace.core.datamodel.RawSpan;
 import org.hypertrace.core.serviceframework.config.ConfigClientFactory;
