@@ -161,7 +161,9 @@ public class JaegerSpanNormalizer {
           .ifPresent(rawSpanBuilder::setResource);
 
       // redact PII tags, tag comparisons are case insensitive (Resource tags are skipped)
-      sanitiseSpan(rawSpanBuilder);
+      if(redactedAttributeValue != null) {
+        sanitiseSpan(rawSpanBuilder);
+      }
 
       // build raw span
       RawSpan rawSpan = rawSpanBuilder.build();
