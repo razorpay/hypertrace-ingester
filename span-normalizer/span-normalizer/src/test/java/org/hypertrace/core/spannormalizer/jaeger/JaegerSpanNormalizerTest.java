@@ -264,7 +264,7 @@ public class JaegerSpanNormalizerTest {
     RawSpan rawSpan = normalizer.convert(tenantId, span);
 
     var attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
-    ConcurrentMap<String, Counter> counterMap = normalizer.getSpanAttributesRedactedCounters();
+    Map<String, Counter> counterMap = normalizer.getSpanAttributesRedactedCounters();
 
     Assertions.assertEquals("client", attributes.get("kind").getValue());
     Assertions.assertEquals(
@@ -350,7 +350,7 @@ public class JaegerSpanNormalizerTest {
     RawSpan rawSpan = normalizer.convert(tenantId, span);
 
     var attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
-    ConcurrentMap<String, Counter> counterMap = normalizer.getSpanAttributesRedactedCounters();
+    Map<String, Counter> counterMap = normalizer.getSpanAttributesRedactedCounters();
 
     Assertions.assertEquals("client", attributes.get("kind").getValue());
     Assertions.assertEquals("hypertrace.org", attributes.get("http.url").getValue());
