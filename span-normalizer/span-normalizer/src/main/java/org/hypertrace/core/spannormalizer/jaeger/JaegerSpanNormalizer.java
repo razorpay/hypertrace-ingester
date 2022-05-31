@@ -255,19 +255,19 @@ public class JaegerSpanNormalizer {
 
   private void logSpanRedaction(String tagKey, String spanServiceName, PIIMatchType matchType) {
     try {
-        LOG.info(
-            new ObjectMapper()
-                .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(
-                    Map.of(
-                        "bookmark",
-                        "REDACTED_KEY",
-                        "key",
-                        tagKey,
-                        "matchtype",
-                        matchType.toString(),
-                        "serviceName",
-                        spanServiceName)));
+      LOG.info(
+          new ObjectMapper()
+              .writerWithDefaultPrettyPrinter()
+              .writeValueAsString(
+                  Map.of(
+                      "bookmark",
+                      "REDACTED_KEY",
+                      "key",
+                      tagKey,
+                      "matchtype",
+                      matchType.toString(),
+                      "serviceName",
+                      spanServiceName)));
     } catch (Exception e) {
       LOG.error("An exception occurred while logging span redaction: ", e);
     }
