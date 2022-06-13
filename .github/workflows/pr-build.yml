@@ -76,7 +76,7 @@ jobs:
           username: ${{ secrets.PUBLIC_DOCKER_USERNAME }}
           password: ${{ secrets.PUBLIC_DOCKER_PASSWORD }}
       
-     - name: Build with Gradle
+      - name: Build with Gradle
         uses: hypertrace/github-actions/gradle@main
         with: 
           args: build dockerBuildImages
