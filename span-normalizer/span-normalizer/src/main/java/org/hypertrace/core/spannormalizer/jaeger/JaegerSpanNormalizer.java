@@ -13,7 +13,6 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,6 +45,7 @@ import org.hypertrace.core.datamodel.Metrics;
 import org.hypertrace.core.datamodel.RawSpan;
 import org.hypertrace.core.datamodel.RawSpan.Builder;
 import org.hypertrace.core.datamodel.eventfields.jaeger.JaegerFields;
+import org.hypertrace.core.datamodel.shared.HexUtils;
 import org.hypertrace.core.datamodel.shared.trace.AttributeValueCreator;
 import org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry;
 import org.hypertrace.core.span.constants.RawSpanConstants;
@@ -193,7 +193,7 @@ public class JaegerSpanNormalizer {
       var attributeMap = rawSpanBuilder.getEvent().getAttributes().getAttributeMap();
       var spanEventName = rawSpanBuilder.getEvent().getEventName();
       var spanEventId =
-          StandardCharsets.UTF_8.decode(rawSpanBuilder.getEvent().getEventId()).toString();
+              Optional.ofNullable(rawSpanBuilder.getEvent().getEventId()).map(HexUtils::getHex).orElse(null);
       Set<String> tagKeys = attributeMap.keySet();
 
       AtomicReference<Boolean> containsPIIFields = new AtomicReference<>();

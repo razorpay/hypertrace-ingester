@@ -259,7 +259,7 @@ public class JaegerSpanNormalizerTest {
             .addTags(8, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
             .addTags(9, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
             .setOperationName("redaction operation")
-            .setSpanId(ByteString.copyFromUtf8("1"))
+            .setSpanId(ByteString.copyFrom("1".getBytes()))
             .build();
 
     RawSpan rawSpan = normalizer.convert(tenantId, span);
