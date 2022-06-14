@@ -13,7 +13,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -192,7 +192,7 @@ public class JaegerSpanNormalizer {
     try {
       var attributeMap = rawSpanBuilder.getEvent().getAttributes().getAttributeMap();
       var spanEventName = rawSpanBuilder.getEvent().getEventName();
-      var spanEventId = rawSpanBuilder.getEvent().getEventId();
+      var spanEventId = StandardCharsets.UTF_8.decode(rawSpanBuilder.getEvent().getEventId()).toString();
       Set<String> tagKeys = attributeMap.keySet();
 
       AtomicReference<Boolean> containsPIIFields = new AtomicReference<>();
@@ -248,15 +248,14 @@ public class JaegerSpanNormalizer {
   }
 
   private void logSpanRedaction(
-      String tagKey, String spanEventName, ByteBuffer spanEventId, PIIMatchType matchType) {
+      String tagKey, String spanEventName, String spanEventId, PIIMatchType matchType) {
     try {
-      String spanId = String.valueOf(spanEventId);
       LOG.info(
           "bookmark: REDACTED_KEY, key: {}, matchtype: {}, spanEventName: {}, spanId: {}",
           tagKey,
           matchType.toString(),
           spanEventName,
-          spanId);
+              spanEventId);
       String metricKey = tagKey + "#" + spanEventName;
       if (spanAttributesRedactedCounters.size() < MAX_REDACTED_SPAN_METRIC_COUNTERS) {
         spanAttributesRedactedCounters

@@ -2,6 +2,7 @@ package org.hypertrace.core.spannormalizer.jaeger;
 
 import static org.hypertrace.core.span.constants.v1.Http.HTTP_REQUEST_METHOD;
 
+import com.google.protobuf.ByteString;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.jaegertracing.api_v2.JaegerSpanInternalModel.KeyValue;
@@ -258,6 +259,7 @@ public class JaegerSpanNormalizerTest {
             .addTags(8, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
             .addTags(9, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
             .setOperationName("redaction operation")
+                .setSpanId(ByteString.copyFromUtf8("1"))
             .build();
 
     RawSpan rawSpan = normalizer.convert(tenantId, span);
@@ -306,6 +308,7 @@ public class JaegerSpanNormalizerTest {
         Span.newBuilder()
             .setProcess(process)
             .addTags(0, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
+                .setSpanId(ByteString.copyFromUtf8("2"))
             .build();
     rawSpan = normalizer.convert(tenantId, span);
     attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
@@ -325,6 +328,7 @@ public class JaegerSpanNormalizerTest {
               .addTags(
                   0,
                   KeyValue.newBuilder().setKey("amount").setVStr("spanCount:" + spanCount).build())
+                  .setSpanId(ByteString.copyFromUtf8("3"))
               .build();
       normalizer.convert(tenantId, span);
     }
