@@ -2,6 +2,7 @@ package org.hypertrace.core.spannormalizer.jaeger;
 
 import static org.hypertrace.core.span.constants.v1.Http.HTTP_REQUEST_METHOD;
 
+import com.google.protobuf.ByteString;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.jaegertracing.api_v2.JaegerSpanInternalModel.KeyValue;
@@ -23,7 +24,6 @@ import org.hypertrace.core.span.constants.RawSpanConstants;
 import org.hypertrace.core.span.constants.v1.JaegerAttribute;
 import org.hypertrace.core.spannormalizer.SpanNormalizer;
 import org.hypertrace.core.spannormalizer.constants.SpanNormalizerConstants;
-import org.hypertrace.core.spannormalizer.jaeger.tenant.PIIMatchType;
 import org.hypertrace.core.spannormalizer.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -258,6 +258,8 @@ public class JaegerSpanNormalizerTest {
             .addTags(7, KeyValue.newBuilder().setKey("phoneNum2").setVStr("+1234567890").build())
             .addTags(8, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
             .addTags(9, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
+            .setOperationName("redaction operation")
+            .setSpanId(ByteString.copyFrom("1".getBytes()))
             .build();
 
     RawSpan rawSpan = normalizer.convert(tenantId, span);
@@ -283,8 +285,21 @@ public class JaegerSpanNormalizerTest {
     Assertions.assertEquals("123456789", attributes.get("phonenum3").getValue());
     Assertions.assertEquals(
         SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("otp").getValue());
-    Assertions.assertEquals(5.0, counterMap.get(PIIMatchType.KEY.toString()).count());
-    Assertions.assertEquals(2.0, counterMap.get(PIIMatchType.REGEX.toString()).count());
+    Assertions.assertEquals(7, counterMap.size());
+    Assertions.assertEquals(1.0, counterMap.get("http.url#redaction operation").count());
+    Assertions.assertEquals(
+        "redaction operation",
+        counterMap.get("http.url#redaction operation").getId().getTag("spanEventName"));
+    Assertions.assertEquals(
+        "http.url", counterMap.get("http.url#redaction operation").getId().getTag("tagKey"));
+    Assertions.assertEquals(
+        "redaction operation",
+        counterMap.get("http.url#redaction operation").getId().getTag("spanEventName"));
+    Assertions.assertEquals(
+        "phonenum1", counterMap.get("phonenum1#redaction operation").getId().getTag("tagKey"));
+    Assertions.assertEquals(
+        "redaction operation",
+        counterMap.get("phonenum1#redaction operation").getId().getTag("spanEventName"));
     Assertions.assertTrue(attributes.containsKey(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY));
     Assertions.assertEquals(
         "true", attributes.get(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY).getValue());
@@ -293,18 +308,73 @@ public class JaegerSpanNormalizerTest {
         Span.newBuilder()
             .setProcess(process)
             .addTags(0, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
+            .setSpanId(ByteString.copyFromUtf8("2"))
             .build();
-
     rawSpan = normalizer.convert(tenantId, span);
     attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
     counterMap = normalizer.getSpanAttributesRedactedCounters();
 
-    Assertions.assertEquals(6.0, counterMap.get(PIIMatchType.KEY.toString()).count());
-    Assertions.assertEquals(2.0, counterMap.get(PIIMatchType.REGEX.toString()).count());
+    Assertions.assertEquals(8, counterMap.size());
     Assertions.assertEquals(
         SpanNormalizerConstants.PII_FIELD_REDACTED_VAL, attributes.get("otp").getValue());
     Assertions.assertEquals(
         "true", attributes.get(SpanNormalizerConstants.CONTAINS_PII_TAGS_KEY).getValue());
+
+    for (int spanCount = 1; spanCount <= 150; spanCount++) {
+      span =
+          Span.newBuilder()
+              .setProcess(process)
+              .setOperationName("random event" + spanCount)
+              .addTags(
+                  0,
+                  KeyValue.newBuilder().setKey("amount").setVStr("spanCount:" + spanCount).build())
+              .setSpanId(ByteString.copyFromUtf8("3"))
+              .build();
+      normalizer.convert(tenantId, span);
+    }
+
+    Assertions.assertEquals(100, counterMap.size());
+
+    Map<String, Object> newConfig = new HashMap<>(getCommonConfig());
+    newConfig.put("max.redacted.span.metric.counters", 101);
+    normalizer = JaegerSpanNormalizer.get(ConfigFactory.parseMap(newConfig));
+    for (int spanCount = 1; spanCount <= 10; spanCount++) {
+      span =
+          Span.newBuilder()
+              .setProcess(process)
+              .setOperationName("random event" + spanCount)
+              .addTags(
+                  0,
+                  KeyValue.newBuilder().setKey("amount").setVStr("spanCount:" + spanCount).build())
+              .build();
+      normalizer.convert(tenantId, span);
+    }
+
+    Assertions.assertEquals(100, counterMap.size());
+  }
+
+  @Test
+  public void testPiiFieldRedactionMetrics() throws Exception {
+    Map<String, Object> newConfig = new HashMap<>(getCommonConfig());
+    newConfig.put(SpanNormalizerConstants.MAX_REDACTED_SPAN_METRIC_COUNTERS_CONFIG_KEY, 101);
+    String tenantId = "tenant-" + random.nextLong();
+    newConfig.putAll(Map.of("processor", Map.of("defaultTenantId", tenantId)));
+    JaegerSpanNormalizer normalizer = JaegerSpanNormalizer.get(ConfigFactory.parseMap(newConfig));
+    Process process = Process.newBuilder().build();
+
+    for (int spanCount = 1; spanCount <= 150; spanCount++) {
+      Span span =
+          Span.newBuilder()
+              .setProcess(process)
+              .setOperationName("random event" + spanCount)
+              .addTags(
+                  0,
+                  KeyValue.newBuilder().setKey("amount").setVStr("spanCount:" + spanCount).build())
+              .build();
+      normalizer.convert(tenantId, span);
+    }
+
+    Assertions.assertEquals(101, normalizer.getSpanAttributesRedactedCounters().size());
   }
 
   @Test

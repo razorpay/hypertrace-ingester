@@ -7,7 +7,10 @@ public class SpanNormalizerConstants {
   public static final String SPAN_NORMALIZER_JOB_CONFIG = "span-normalizer-job-config";
   public static final String BYPASS_OUTPUT_TOPIC_CONFIG_KEY = "bypass.output.topic";
   public static final String PII_KEYS_CONFIG_KEY = "pii.keys";
+  public static final String PII_CONFIG_KEY = "pii";
   public static final String PII_REGEX_CONFIG_KEY = "pii.regex";
   public static final String PII_FIELD_REDACTED_VAL = "[redacted]";
   public static final String CONTAINS_PII_TAGS_KEY = "containsPIITags";
+  public static final String MAX_REDACTED_SPAN_METRIC_COUNTERS_CONFIG_KEY =
+      "pii.max.redacted.span.metric.counters";
 }

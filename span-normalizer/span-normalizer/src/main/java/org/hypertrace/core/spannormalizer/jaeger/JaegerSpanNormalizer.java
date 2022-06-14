@@ -3,7 +3,6 @@ package org.hypertrace.core.spannormalizer.jaeger;
 import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
 import static org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry.registerCounter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.util.Timestamps;
 import com.typesafe.config.Config;
@@ -46,6 +45,7 @@ import org.hypertrace.core.datamodel.Metrics;
 import org.hypertrace.core.datamodel.RawSpan;
 import org.hypertrace.core.datamodel.RawSpan.Builder;
 import org.hypertrace.core.datamodel.eventfields.jaeger.JaegerFields;
+import org.hypertrace.core.datamodel.shared.HexUtils;
 import org.hypertrace.core.datamodel.shared.trace.AttributeValueCreator;
 import org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry;
 import org.hypertrace.core.span.constants.RawSpanConstants;
@@ -65,6 +65,8 @@ public class JaegerSpanNormalizer {
 
   private static final String SPAN_NORMALIZATION_TIME_METRIC = "span.normalization.time";
   private static final String SPAN_REDACTED_ATTRIBUTES_COUNTER = "span.redacted.attributes";
+  private static Integer MAX_REDACTED_SPAN_METRIC_COUNTERS = 100;
+
   private final Map<String, Counter> spanAttributesRedactedCounters = new ConcurrentHashMap<>();
 
   private static JaegerSpanNormalizer INSTANCE;
@@ -89,6 +91,13 @@ public class JaegerSpanNormalizer {
   }
 
   public JaegerSpanNormalizer(Config config) {
+    if (config.hasPath(SpanNormalizerConstants.PII_CONFIG_KEY)) {
+      loadPIIRedactionConfig(config);
+    }
+    this.tenantIdHandler = new TenantIdHandler(config);
+  }
+
+  private void loadPIIRedactionConfig(Config config) {
     try {
       if (config.hasPath(SpanNormalizerConstants.PII_KEYS_CONFIG_KEY)) {
         config.getStringList(SpanNormalizerConstants.PII_KEYS_CONFIG_KEY).stream()
@@ -110,10 +119,13 @@ public class JaegerSpanNormalizer {
                   .build();
         }
       }
+      if (config.hasPath(SpanNormalizerConstants.MAX_REDACTED_SPAN_METRIC_COUNTERS_CONFIG_KEY)) {
+        MAX_REDACTED_SPAN_METRIC_COUNTERS =
+            config.getInt(SpanNormalizerConstants.MAX_REDACTED_SPAN_METRIC_COUNTERS_CONFIG_KEY);
+      }
     } catch (Exception e) {
       LOG.error("An exception occurred while loading redaction configs: ", e);
     }
-    this.tenantIdHandler = new TenantIdHandler(config);
   }
 
   public Timer getSpanNormalizationTimer(String tenantId) {
@@ -179,7 +191,11 @@ public class JaegerSpanNormalizer {
 
     try {
       var attributeMap = rawSpanBuilder.getEvent().getAttributes().getAttributeMap();
-      var spanServiceName = rawSpanBuilder.getEvent().getServiceName();
+      var spanEventName = rawSpanBuilder.getEvent().getEventName();
+      var spanEventId =
+          Optional.ofNullable(rawSpanBuilder.getEvent().getEventId())
+              .map(HexUtils::getHex)
+              .orElse(null);
       Set<String> tagKeys = attributeMap.keySet();
 
       AtomicReference<Boolean> containsPIIFields = new AtomicReference<>();
@@ -194,21 +210,10 @@ public class JaegerSpanNormalizer {
                             .get(tagKey)
                             .getValue()
                             .equals(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL))
-            .peek(
-                tagKey -> {
-                  containsPIIFields.set(true);
-                  spanAttributesRedactedCounters
-                      .computeIfAbsent(
-                          PIIMatchType.KEY.toString(),
-                          k ->
-                              registerCounter(
-                                  SPAN_REDACTED_ATTRIBUTES_COUNTER,
-                                  Map.of("matchType", PIIMatchType.KEY.toString())))
-                      .increment();
-                })
+            .peek(tagKey -> containsPIIFields.set(true))
             .forEach(
                 tagKey -> {
-                  logSpanRedaction(tagKey, spanServiceName, PIIMatchType.KEY);
+                  logSpanRedaction(tagKey, spanEventName, spanEventId, PIIMatchType.KEY);
                   attributeMap.put(tagKey, redactedAttributeValue);
                 });
       } catch (Exception e) {
@@ -220,15 +225,7 @@ public class JaegerSpanNormalizer {
           for (String tagKey : tagKeys) {
             if (pattern.matcher(attributeMap.get(tagKey).getValue()).matches()) {
               containsPIIFields.set(true);
-              spanAttributesRedactedCounters
-                  .computeIfAbsent(
-                      PIIMatchType.REGEX.toString(),
-                      k ->
-                          registerCounter(
-                              SPAN_REDACTED_ATTRIBUTES_COUNTER,
-                              Map.of("matchType", PIIMatchType.REGEX.toString())))
-                  .increment();
-              logSpanRedaction(tagKey, spanServiceName, PIIMatchType.REGEX);
+              logSpanRedaction(tagKey, spanEventName, spanEventId, PIIMatchType.REGEX);
               attributeMap.put(tagKey, redactedAttributeValue);
             }
           }
@@ -253,22 +250,27 @@ public class JaegerSpanNormalizer {
     }
   }
 
-  private void logSpanRedaction(String tagKey, String spanServiceName, PIIMatchType matchType) {
+  private void logSpanRedaction(
+      String tagKey, String spanEventName, String spanEventId, PIIMatchType matchType) {
     try {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug(
-            new ObjectMapper()
-                .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(
-                    Map.of(
-                        "bookmark",
-                        "REDACTED_KEY",
-                        "key",
-                        tagKey,
-                        "matchtype",
-                        matchType.toString(),
-                        "serviceName",
-                        spanServiceName)));
+      LOG.info(
+          "bookmark: REDACTED_KEY, key: {}, matchtype: {}, spanEventName: {}, spanId: {}",
+          tagKey,
+          matchType.toString(),
+          spanEventName,
+          spanEventId);
+      String metricKey = tagKey + "#" + spanEventName;
+      if (spanAttributesRedactedCounters.size() < MAX_REDACTED_SPAN_METRIC_COUNTERS) {
+        spanAttributesRedactedCounters
+            .computeIfAbsent(
+                metricKey,
+                k ->
+                    registerCounter(
+                        SPAN_REDACTED_ATTRIBUTES_COUNTER,
+                        Map.of("spanEventName", spanEventName, "tagKey", tagKey)))
+            .increment();
+      } else if (spanAttributesRedactedCounters.containsKey(metricKey)) {
+        spanAttributesRedactedCounters.get(metricKey).increment();
       }
     } catch (Exception e) {
       LOG.error("An exception occurred while logging span redaction: ", e);
