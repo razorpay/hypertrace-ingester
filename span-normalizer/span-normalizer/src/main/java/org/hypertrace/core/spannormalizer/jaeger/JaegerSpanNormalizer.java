@@ -193,7 +193,9 @@ public class JaegerSpanNormalizer {
       var attributeMap = rawSpanBuilder.getEvent().getAttributes().getAttributeMap();
       var spanEventName = rawSpanBuilder.getEvent().getEventName();
       var spanEventId =
-              Optional.ofNullable(rawSpanBuilder.getEvent().getEventId()).map(HexUtils::getHex).orElse(null);
+          Optional.ofNullable(rawSpanBuilder.getEvent().getEventId())
+              .map(HexUtils::getHex)
+              .orElse(null);
       Set<String> tagKeys = attributeMap.keySet();
 
       AtomicReference<Boolean> containsPIIFields = new AtomicReference<>();
