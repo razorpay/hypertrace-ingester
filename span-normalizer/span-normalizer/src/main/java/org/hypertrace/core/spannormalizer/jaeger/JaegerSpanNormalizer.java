@@ -192,7 +192,8 @@ public class JaegerSpanNormalizer {
     try {
       var attributeMap = rawSpanBuilder.getEvent().getAttributes().getAttributeMap();
       var spanEventName = rawSpanBuilder.getEvent().getEventName();
-      var spanEventId = StandardCharsets.UTF_8.decode(rawSpanBuilder.getEvent().getEventId()).toString();
+      var spanEventId =
+          StandardCharsets.UTF_8.decode(rawSpanBuilder.getEvent().getEventId()).toString();
       Set<String> tagKeys = attributeMap.keySet();
 
       AtomicReference<Boolean> containsPIIFields = new AtomicReference<>();
@@ -255,7 +256,7 @@ public class JaegerSpanNormalizer {
           tagKey,
           matchType.toString(),
           spanEventName,
-              spanEventId);
+          spanEventId);
       String metricKey = tagKey + "#" + spanEventName;
       if (spanAttributesRedactedCounters.size() < MAX_REDACTED_SPAN_METRIC_COUNTERS) {
         spanAttributesRedactedCounters

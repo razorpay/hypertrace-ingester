@@ -259,7 +259,7 @@ public class JaegerSpanNormalizerTest {
             .addTags(8, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
             .addTags(9, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
             .setOperationName("redaction operation")
-                .setSpanId(ByteString.copyFromUtf8("1"))
+            .setSpanId(ByteString.copyFromUtf8("1"))
             .build();
 
     RawSpan rawSpan = normalizer.convert(tenantId, span);
@@ -308,7 +308,7 @@ public class JaegerSpanNormalizerTest {
         Span.newBuilder()
             .setProcess(process)
             .addTags(0, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
-                .setSpanId(ByteString.copyFromUtf8("2"))
+            .setSpanId(ByteString.copyFromUtf8("2"))
             .build();
     rawSpan = normalizer.convert(tenantId, span);
     attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
@@ -328,7 +328,7 @@ public class JaegerSpanNormalizerTest {
               .addTags(
                   0,
                   KeyValue.newBuilder().setKey("amount").setVStr("spanCount:" + spanCount).build())
-                  .setSpanId(ByteString.copyFromUtf8("3"))
+              .setSpanId(ByteString.copyFromUtf8("3"))
               .build();
       normalizer.convert(tenantId, span);
     }
