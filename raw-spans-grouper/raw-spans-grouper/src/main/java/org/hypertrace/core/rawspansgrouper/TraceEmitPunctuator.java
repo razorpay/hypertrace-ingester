@@ -153,14 +153,14 @@ class TraceEmitPunctuator implements Punctuator {
                     PlatformMetricsRegistry.registerCounter(
                         TRACE_WITH_DUPLICATE_SPANS, Map.of("tenantId", k)))
             .increment();
-        if (logger.isDebugEnabled()) {
-          logger.debug(
-              "Duplicate spanIds: [{}], unique spanIds count: [{}] for tenant: [{}] trace: [{}]",
-              traceState.getSpanIds().size(),
-              spanIds.size(),
-              tenantId,
-              HexUtils.getHex(traceId));
-        }
+//        if (logger.isDebugEnabled()) {
+//          logger.debug(
+//              "Duplicate spanIds: [{}], unique spanIds count: [{}] for tenant: [{}] trace: [{}]",
+//              traceState.getSpanIds().size(),
+//              spanIds.size(),
+//              tenantId,
+//              HexUtils.getHex(traceId));
+//        }
       }
 
       recordSpansPerTrace(rawSpanList.size(), List.of(Tag.of("tenant_id", tenantId)));
@@ -170,13 +170,13 @@ class TraceEmitPunctuator implements Punctuator {
           StructuredTraceBuilder.buildStructuredTraceFromRawSpans(
               rawSpanList, traceId, tenantId, timestamps);
 
-      if (logger.isDebugEnabled()) {
-        logger.debug(
-            "Emit tenant_id=[{}], trace_id=[{}], spans_count=[{}]",
-            tenantId,
-            HexUtils.getHex(traceId),
-            rawSpanList.size());
-      }
+//      if (logger.isDebugEnabled()) {
+//        logger.debug(
+//            "Emit tenant_id=[{}], trace_id=[{}], spans_count=[{}]",
+//            tenantId,
+//            HexUtils.getHex(traceId),
+//            rawSpanList.size());
+//      }
 
       // report entries in spanStore
       if (spanStoreCountRateLimiter.tryAcquire()) {
@@ -218,13 +218,13 @@ class TraceEmitPunctuator implements Punctuator {
     } else {
       // implies spans for the trace have arrived within the last 'sessionTimeoutMs' interval
       // so the session inactivity window is extended from the last timestamp
-      if (logger.isDebugEnabled()) {
-        logger.debug(
-            "Re-scheduling emit trigger for tenant_id=[{}], trace_id=[{}] to [{}]",
-            key.getTenantId(),
-            HexUtils.getHex(key.getTraceId()),
-            Instant.ofEpochMilli(emitTs + groupingWindowTimeoutMs));
-      }
+//      if (logger.isDebugEnabled()) {
+//        logger.debug(
+//            "Re-scheduling emit trigger for tenant_id=[{}], trace_id=[{}] to [{}]",
+//            key.getTenantId(),
+//            HexUtils.getHex(key.getTraceId()),
+//            Instant.ofEpochMilli(emitTs + groupingWindowTimeoutMs));
+//      }
       long newEmitTs = emitTs + groupingWindowTimeoutMs;
       // if current timestamp is ahead of newEmitTs then just add a grace of 100ms and fire it
       long duration = Math.max(100, newEmitTs - timestamp);

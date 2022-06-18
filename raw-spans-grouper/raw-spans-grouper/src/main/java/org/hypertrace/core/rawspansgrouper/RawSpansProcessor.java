@@ -131,13 +131,13 @@ public class RawSpansProcessor
      then the trace can be finalized and emitted
     */
     long traceEmitTs = currentTimeMs + groupingWindowTimeoutMs;
-    if (logger.isDebugEnabled()) {
-      logger.debug(
-          "Updating trigger_ts=[{}] for for tenant_id=[{}], trace_id=[{}]",
-          Instant.ofEpochMilli(traceEmitTs),
-          key.getTenantId(),
-          HexUtils.getHex(traceId));
-    }
+//    if (logger.isDebugEnabled()) {
+//      logger.debug(
+//          "Updating trigger_ts=[{}] for for tenant_id=[{}], trace_id=[{}]",
+//          Instant.ofEpochMilli(traceEmitTs),
+//          key.getTenantId(),
+//          HexUtils.getHex(traceId));
+//    }
 
     if (firstEntry) {
       traceState =
@@ -179,14 +179,14 @@ public class RawSpansProcessor
 
     if (inFlightSpansPerTrace >= maxSpanCountTenantLimit) {
 
-      if (logger.isDebugEnabled()) {
-        logger.debug(
-            "Dropping span [{}] from tenant_id={}, trace_id={} after grouping {} spans",
-            traceState.getSpanIds().stream().map(HexUtils::getHex).collect(Collectors.toList()),
-            key.getTenantId(),
-            HexUtils.getHex(key.getTraceId()),
-            traceState.getSpanIds().size());
-      }
+//      if (logger.isDebugEnabled()) {
+//        logger.debug(
+//            "Dropping span [{}] from tenant_id={}, trace_id={} after grouping {} spans",
+//            traceState.getSpanIds().stream().map(HexUtils::getHex).collect(Collectors.toList()),
+//            key.getTenantId(),
+//            HexUtils.getHex(key.getTraceId()),
+//            traceState.getSpanIds().size());
+//      }
 
       // increment the counter for dropped spans
       droppedSpansCounter
@@ -229,10 +229,10 @@ public class RawSpansProcessor
             PunctuationType.WALL_CLOCK_TIME,
             punctuator);
     punctuator.setCancellable(cancellable);
-    logger.debug(
-        "Scheduled a punctuator to emit trace for key=[{}] to run after [{}] ms",
-        key,
-        groupingWindowTimeoutMs);
+//    logger.debug(
+//        "Scheduled a punctuator to emit trace for key=[{}] to run after [{}] ms",
+//        key,
+//        groupingWindowTimeoutMs);
   }
 
   @Override
