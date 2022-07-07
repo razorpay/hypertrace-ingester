@@ -85,7 +85,7 @@ public class RawSpansProcessor
             .setApplicationName("RSG")
             .setProfilingEvent(EventType.ITIMER)
             .setFormat(Format.JFR)
-            .setServerAddress("http://pyroscope.dev.razorpay.in")
+            .setServerAddress("https://pyroscope.dev.razorpay.in")
             // Optionally, if authentication is enabled, specify the API key.
             // .setAuthToken(System.getenv("PYROSCOPE_AUTH_TOKEN"))
             .build());
