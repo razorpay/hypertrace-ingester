@@ -22,8 +22,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.apache.kafka.streams.processor.Cancellable;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.PunctuationType;
@@ -174,14 +172,15 @@ class TraceEmitPunctuator implements Punctuator {
       recordSpansPerTrace(rawSpanList.size(), List.of(Tag.of("tenant_id", tenantId)));
       Timestamps timestamps =
           trackEndToEndLatencyTimestamps(timestamp, traceState.getTraceStartTimestamp());
-      AtomicReference<StructuredTrace> trace = null;
       Pyroscope.LabelsWrapper.run(
-              new LabelsSet("buildStructuredTraceFromRawSpans"),
-              () -> {
-                trace.set(StructuredTraceBuilder.buildStructuredTraceFromRawSpans(
-                        rawSpanList, traceId, tenantId, timestamps));
-              });
-      
+          new LabelsSet("SpanStoreOperation", "put"),
+          () -> {
+            StructuredTraceBuilder.buildStructuredTraceFromRawSpans(
+                rawSpanList, traceId, tenantId, timestamps);
+          });
+      StructuredTrace trace =
+          StructuredTraceBuilder.buildStructuredTraceFromRawSpans(
+              rawSpanList, traceId, tenantId, timestamps);
 
       if (logger.isDebugEnabled()) {
         logger.debug(
