@@ -16,7 +16,6 @@ import com.typesafe.config.Config;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
 import io.pyroscope.http.Format;
-import io.pyroscope.javaagent.EventType;
 import io.pyroscope.javaagent.PyroscopeAgent;
 import java.nio.ByteBuffer;
 import java.time.Duration;
@@ -83,11 +82,10 @@ public class RawSpansProcessor
     PyroscopeAgent.start(
         new io.pyroscope.javaagent.config.Config.Builder()
             .setApplicationName("RSG")
-            .setProfilingEvent(EventType.ITIMER)
+            .setProfilingInterval(Duration.ofSeconds(30))
+            .setUploadInterval(Duration.ofSeconds(50))
             .setFormat(Format.JFR)
             .setServerAddress("https://pyroscope.dev.razorpay.in")
-            // Optionally, if authentication is enabled, specify the API key.
-            // .setAuthToken(System.getenv("PYROSCOPE_AUTH_TOKEN"))
             .build());
     this.context = context;
     this.spanStore =
