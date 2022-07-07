@@ -45,6 +45,7 @@ dependencies {
     implementation("de.javakaffee:kryo-serializers:0.45")
     implementation("io.confluent:kafka-avro-serializer:5.5.0")
     implementation("com.google.guava:guava:30.1.1-jre")
+    implementation("io.pyroscope:agent:0.9.1")
 
     // Logging
     implementation("org.slf4j:slf4j-api:1.7.30")

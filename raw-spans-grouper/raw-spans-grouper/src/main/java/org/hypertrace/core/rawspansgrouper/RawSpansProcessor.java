@@ -15,6 +15,9 @@ import static org.hypertrace.core.rawspansgrouper.RawSpanGrouperConstants.TRUNCA
 import com.typesafe.config.Config;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
+import io.pyroscope.http.Format;
+import io.pyroscope.javaagent.EventType;
+import io.pyroscope.javaagent.PyroscopeAgent;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.Instant;
@@ -77,6 +80,15 @@ public class RawSpansProcessor
 
   @Override
   public void init(ProcessorContext context) {
+    PyroscopeAgent.start(
+        new io.pyroscope.javaagent.config.Config.Builder()
+            .setApplicationName("RSG")
+            .setProfilingEvent(EventType.ITIMER)
+            .setFormat(Format.JFR)
+            .setServerAddress("http://pyroscope.dev.razorpay.in:4040")
+            // Optionally, if authentication is enabled, specify the API key.
+            // .setAuthToken(System.getenv("PYROSCOPE_AUTH_TOKEN"))
+            .build());
     this.context = context;
     this.spanStore =
         (KeyValueStore<SpanIdentity, RawSpan>) context.getStateStore(SPAN_STATE_STORE_NAME);
