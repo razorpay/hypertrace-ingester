@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.apache.kafka.streams.processor.Cancellable;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.PunctuationType;
@@ -172,9 +174,14 @@ class TraceEmitPunctuator implements Punctuator {
       recordSpansPerTrace(rawSpanList.size(), List.of(Tag.of("tenant_id", tenantId)));
       Timestamps timestamps =
           trackEndToEndLatencyTimestamps(timestamp, traceState.getTraceStartTimestamp());
-      StructuredTrace trace =
-          StructuredTraceBuilder.buildStructuredTraceFromRawSpans(
-              rawSpanList, traceId, tenantId, timestamps);
+      AtomicReference<StructuredTrace> trace = null;
+      Pyroscope.LabelsWrapper.run(
+              new LabelsSet("buildStructuredTraceFromRawSpans"),
+              () -> {
+                trace.set(StructuredTraceBuilder.buildStructuredTraceFromRawSpans(
+                        rawSpanList, traceId, tenantId, timestamps));
+              });
+      
 
       if (logger.isDebugEnabled()) {
         logger.debug(
@@ -234,13 +241,8 @@ class TraceEmitPunctuator implements Punctuator {
       long newEmitTs = emitTs + groupingWindowTimeoutMs;
       // if current timestamp is ahead of newEmitTs then just add a grace of 100ms and fire it
       long duration = Math.max(100, newEmitTs - timestamp);
-      Pyroscope.LabelsWrapper.run(
-          new LabelsSet("SchedulingPunctuator"),
-          () -> {
-            cancellable =
-                context.schedule(
-                    Duration.ofMillis(duration), PunctuationType.WALL_CLOCK_TIME, this);
-          });
+      cancellable =
+          context.schedule(Duration.ofMillis(duration), PunctuationType.WALL_CLOCK_TIME, this);
     }
   }
 
