@@ -173,7 +173,7 @@ class TraceEmitPunctuator implements Punctuator {
       Timestamps timestamps =
           trackEndToEndLatencyTimestamps(timestamp, traceState.getTraceStartTimestamp());
       Pyroscope.LabelsWrapper.run(
-          new LabelsSet("SpanStoreOperation", "put"),
+          new LabelsSet("StructuredTraceOperation", "buildStructuredTraceFromRawSpans"),
           () -> {
             StructuredTraceBuilder.buildStructuredTraceFromRawSpans(
                 rawSpanList, traceId, tenantId, timestamps);
