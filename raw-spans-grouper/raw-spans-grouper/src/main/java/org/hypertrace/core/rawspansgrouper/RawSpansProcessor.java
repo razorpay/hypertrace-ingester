@@ -16,7 +16,10 @@ import com.typesafe.config.Config;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
 import io.pyroscope.http.Format;
+import io.pyroscope.javaagent.EventType;
 import io.pyroscope.javaagent.PyroscopeAgent;
+import io.pyroscope.labels.LabelsSet;
+import io.pyroscope.labels.Pyroscope;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.Instant;
@@ -26,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Transformer;
@@ -82,6 +86,7 @@ public class RawSpansProcessor
     PyroscopeAgent.start(
         new io.pyroscope.javaagent.config.Config.Builder()
             .setApplicationName("RSG")
+            .setProfilingEvent(EventType.ITIMER)
             .setProfilingInterval(Duration.ofSeconds(30))
             .setUploadInterval(Duration.ofSeconds(50))
             .setFormat(Format.JFR)
@@ -126,14 +131,26 @@ public class RawSpansProcessor
     TraceState traceState = traceStateStore.get(key);
     boolean firstEntry = (traceState == null);
 
-    if (shouldDropSpan(key, traceState)) {
+    AtomicBoolean flag = new AtomicBoolean(false);
+    TraceState finalTraceState1 = traceState;
+    Pyroscope.LabelsWrapper.run(
+        new LabelsSet("ShouldDropSpan"),
+        () -> {
+          flag.set(shouldDropSpan(key, finalTraceState1));
+        });
+    if (flag.get()) {
       return null;
     }
 
     String tenantId = key.getTenantId();
     ByteBuffer traceId = value.getTraceId();
     ByteBuffer spanId = value.getEvent().getEventId();
-    spanStore.put(new SpanIdentity(tenantId, traceId, spanId), value);
+
+    Pyroscope.LabelsWrapper.run(
+        new LabelsSet("SpanStoreOperation", "put"),
+        () -> {
+          spanStore.put(new SpanIdentity(tenantId, traceId, spanId), value);
+        });
 
     /*
      the trace emit ts is essentially currentTs + groupingWindowTimeoutMs
@@ -166,7 +183,12 @@ public class RawSpansProcessor
       traceState.setEmitTs(traceEmitTs);
     }
 
-    traceStateStore.put(key, traceState);
+    TraceState finalTraceState = traceState;
+    Pyroscope.LabelsWrapper.run(
+        new LabelsSet("TraceStoreOperation", "put"),
+        () -> {
+          traceStateStore.put(key, finalTraceState);
+        });
 
     tenantToSpansGroupingTimer
         .computeIfAbsent(
