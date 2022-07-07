@@ -131,14 +131,7 @@ public class RawSpansProcessor
     TraceState traceState = traceStateStore.get(key);
     boolean firstEntry = (traceState == null);
 
-    AtomicBoolean flag = new AtomicBoolean(false);
-    TraceState finalTraceState1 = traceState;
-    Pyroscope.LabelsWrapper.run(
-        new LabelsSet("ShouldDropSpan"),
-        () -> {
-          flag.set(shouldDropSpan(key, finalTraceState1));
-        });
-    if (flag.get()) {
+    if (shouldDropSpan(key, traceState)) {
       return null;
     }
 
