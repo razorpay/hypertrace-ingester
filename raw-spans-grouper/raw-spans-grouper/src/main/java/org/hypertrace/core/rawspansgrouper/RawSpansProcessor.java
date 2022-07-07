@@ -86,6 +86,8 @@ public class RawSpansProcessor
         new io.pyroscope.javaagent.config.Config.Builder()
             .setApplicationName("RSG")
             .setProfilingEvent(EventType.ITIMER)
+            .setProfilingInterval(Duration.ofSeconds(30))
+            .setUploadInterval(Duration.ofSeconds(50))
             .setFormat(Format.JFR)
             .setServerAddress("https://pyroscope.dev.razorpay.in")
             .build());

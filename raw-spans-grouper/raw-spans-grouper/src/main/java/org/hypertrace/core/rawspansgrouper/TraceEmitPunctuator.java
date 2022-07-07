@@ -8,6 +8,8 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Timer;
+import io.pyroscope.labels.LabelsSet;
+import io.pyroscope.labels.Pyroscope;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.Instant;
@@ -128,7 +130,11 @@ class TraceEmitPunctuator implements Punctuator {
       // Implies that no new spans for the trace have arrived within the last
       // 'groupingWindowTimeoutMs' interval
       // so the trace can be finalized and emitted
-      traceStateStore.delete(key);
+      Pyroscope.LabelsWrapper.run(
+          new LabelsSet("TraceStoreOperation", "delete"),
+          () -> {
+            traceStateStore.delete(key);
+          });
 
       ByteBuffer traceId = traceState.getTraceId();
       String tenantId = traceState.getTenantId();
@@ -228,8 +234,13 @@ class TraceEmitPunctuator implements Punctuator {
       long newEmitTs = emitTs + groupingWindowTimeoutMs;
       // if current timestamp is ahead of newEmitTs then just add a grace of 100ms and fire it
       long duration = Math.max(100, newEmitTs - timestamp);
-      cancellable =
-          context.schedule(Duration.ofMillis(duration), PunctuationType.WALL_CLOCK_TIME, this);
+      Pyroscope.LabelsWrapper.run(
+          new LabelsSet("SchedulingPunctuator"),
+          () -> {
+            cancellable =
+                context.schedule(
+                    Duration.ofMillis(duration), PunctuationType.WALL_CLOCK_TIME, this);
+          });
     }
   }
 
