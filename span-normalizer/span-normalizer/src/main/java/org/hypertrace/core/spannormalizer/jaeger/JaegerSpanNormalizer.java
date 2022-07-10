@@ -174,20 +174,22 @@ public class JaegerSpanNormalizer {
         logSpanConversion(jaegerSpan, rawSpan);
       }
 
-      if (!HAS_LOGGED_ATTRIBUTES && FILE_LOGGER.isDebugEnabled()) {
-        // Each entry = 10 bytes for keys + 50 bytes for values on an average. Total map size ~ 6M
-        if (ATTRIBUTES.size() > 100_000) {
-          synchronized (this) {
-            ATTRIBUTES.forEach((k, v) -> FILE_LOGGER.debug("{},{}", k, v));
-            ATTRIBUTES.clear();
-            HAS_LOGGED_ATTRIBUTES = true;
-          }
-        } else {
-          Map<String, AttributeValue> attributes =
-              rawSpan.getEvent().getAttributes().getAttributeMap();
-          attributes.forEach((k, v) -> ATTRIBUTES.put(k, v.getValue()));
-        }
-      }
+      Map<String, AttributeValue> attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
+      attributes.forEach((k, v) -> FILE_LOGGER.debug("{},{}", k, v));
+
+      //      if (!HAS_LOGGED_ATTRIBUTES && FILE_LOGGER.isDebugEnabled()) {
+      //        // Each entry = 10 bytes for keys + 50 bytes for values on an average. Total map
+      // size ~ 6M
+      //        if (ATTRIBUTES.size() > 100_000) {
+      //          synchronized (this) {
+      //            ATTRIBUTES.forEach((k, v) -> FILE_LOGGER.debug("{},{}", k, v));
+      //            ATTRIBUTES.clear();
+      //            HAS_LOGGED_ATTRIBUTES = true;
+      //          }
+      //        } else {
+      //          attributes.forEach((k, v) -> ATTRIBUTES.put(k, v.getValue()));
+      //        }
+      //      }
 
       return rawSpan;
     };
