@@ -63,9 +63,7 @@ public class JaegerSpanNormalizer {
   private static final Map<String, String> ATTRIBUTES = new ConcurrentHashMap<>();
   private static boolean HAS_LOGGED_ATTRIBUTES = false;
 
-  /**
-   * Service name can be sent against this key as well
-   */
+  /** Service name can be sent against this key as well */
   public static final String OLD_JAEGER_SERVICENAME_KEY = "jaeger.servicename";
 
   private static final String SPAN_NORMALIZATION_TIME_METRIC = "span.normalization.time";
@@ -177,7 +175,7 @@ public class JaegerSpanNormalizer {
       }
 
       if (!HAS_LOGGED_ATTRIBUTES && FILE_LOGGER.isDebugEnabled()) {
-        //Each entry = 10 bytes for keys + 50 bytes for values on an average. Total map size ~ 6M
+        // Each entry = 10 bytes for keys + 50 bytes for values on an average. Total map size ~ 6M
         if (ATTRIBUTES.size() > 100_000) {
           synchronized (this) {
             ATTRIBUTES.forEach((k, v) -> FILE_LOGGER.debug("{},{}", k, v));
@@ -185,8 +183,8 @@ public class JaegerSpanNormalizer {
             HAS_LOGGED_ATTRIBUTES = true;
           }
         } else {
-          Map<String, AttributeValue> attributes = rawSpan.getEvent().getAttributes()
-              .getAttributeMap();
+          Map<String, AttributeValue> attributes =
+              rawSpan.getEvent().getAttributes().getAttributeMap();
           attributes.forEach((k, v) -> ATTRIBUTES.put(k, v.getValue()));
         }
       }
@@ -211,9 +209,9 @@ public class JaegerSpanNormalizer {
                 tagKey ->
                     tagKeysToRedact.contains(tagKey.toUpperCase())
                         || attributeMap
-                        .get(tagKey)
-                        .getValue()
-                        .equals(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL))
+                            .get(tagKey)
+                            .getValue()
+                            .equals(SpanNormalizerConstants.PII_FIELD_REDACTED_VAL))
             .peek(
                 tagKey -> {
                   containsPIIFields.set(true);
