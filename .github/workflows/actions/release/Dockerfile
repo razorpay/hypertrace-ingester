@@ -1,4 +1,4 @@
-#FROM c.rzp.io/razorpay/onggi:alpine-3.13
+FROM c.rzp.io/razorpay/onggi:alpine-3.13
 #
 #ARG HELM_VERSION=3.5.2
 #ARG KUBECTL_VERSION=1.19.15
