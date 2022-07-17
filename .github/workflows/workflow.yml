@@ -3,12 +3,16 @@ on:
     types: [opened]
   issue_comment:
     types: [created]
-name: release
+name: Create release tag
 jobs:
   release:
-    if: contains(github.event.comment.html_url, '/pull/') && contains(github.event.comment.body, '/release')
-    runs-on: [self-hosted]
+    # if: contains(github.event.comment.html_url, '/pull/') && contains(github.event.comment.body, '/release')
+    runs-on: ubuntu-20.04
     steps:
+      - name: Test github event object
+        run: |
+          echo ${{ github.event.comment.html_url }}
+          echo ${{ github.event.comment.body }}
       - name: cleanup #https://github.com/actions/checkout/issues/211
         run: |
           sudo chown -R $USER:$USER $GITHUB_WORKSPACE
@@ -29,10 +33,10 @@ jobs:
 #          username: ${{ secrets.HARBOR_DOCKER_USERNAME }}
 #          password: ${{ secrets.HARBOR_DOCKER_PASSWORD }}
 #
-      - name: git token
-        env: # Or as an environment variable
-          git_user: ${{ secrets.GIT_USER }}
-          GIT_TOKEN: ${{ github.token }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        uses: ./.github/actions/release
+#      - name: git token
+#        env: # Or as an environment variable
+#          git_user: ${{ secrets.GIT_USER }}
+#          GIT_TOKEN: ${{ github.token }}
+#          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#        uses: ./.github/actions/release
