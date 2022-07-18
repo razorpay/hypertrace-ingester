@@ -1,42 +1,47 @@
 package org.hypertrace.core.spannormalizer.jaeger;
 
-import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
-import static org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry.registerCounter;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.util.Timestamps;
 import com.typesafe.config.Config;
+import io.jaegertracing.api_v2.JaegerSpanInternalModel.KeyValue;
+import io.jaegertracing.api_v2.JaegerSpanInternalModel.Span;
+import io.jaegertracing.api_v2.JaegerSpanInternalModel.SpanRef;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.io.JsonEncoder;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.specific.SpecificRecordBase;
-import org.hypertrace.core.datamodel.Event;
-import org.hypertrace.core.datamodel.RawSpan;
+import org.apache.commons.lang3.StringUtils;
+import org.hypertrace.core.datamodel.*;
 import org.hypertrace.core.datamodel.RawSpan.Builder;
+import org.hypertrace.core.datamodel.eventfields.jaeger.JaegerFields;
+import org.hypertrace.core.datamodel.shared.trace.AttributeValueCreator;
 import org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry;
 import org.hypertrace.core.span.constants.RawSpanConstants;
+import org.hypertrace.core.span.constants.v1.JaegerAttribute;
 import org.hypertrace.core.spannormalizer.constants.SpanNormalizerConstants;
 import org.hypertrace.core.spannormalizer.jaeger.tenant.PIIMatchType;
 import org.hypertrace.core.spannormalizer.util.JaegerHTTagsConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
+
+import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
+import static org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry.registerCounter;
 
 public class JaegerSpanNormalizer {
 
@@ -269,13 +274,13 @@ public class JaegerSpanNormalizer {
     eventBuilder.setEndTimeMillis(endTimeMillis);
 
     // SPAN REFS
-    List<JaegerSpanInternalModel.SpanRef> referencesList = jaegerSpan.getReferencesList();
+    List<SpanRef> referencesList = jaegerSpan.getReferencesList();
     if (referencesList.size() > 0) {
       eventBuilder.setEventRefList(new ArrayList<>());
       // Convert the reflist to a set to remove duplicate references. This has been observed in the
       // field.
-      Set<JaegerSpanInternalModel.SpanRef> referencesSet = new HashSet<>(referencesList);
-      for (JaegerSpanInternalModel.SpanRef spanRef : referencesSet) {
+      Set<SpanRef> referencesSet = new HashSet<>(referencesList);
+      for (SpanRef spanRef : referencesSet) {
         EventRef.Builder builder = fastNewBuilder(EventRef.Builder.class);
         builder.setTraceId(spanRef.getTraceId().asReadOnlyByteBuffer());
         builder.setEventId(spanRef.getSpanId().asReadOnlyByteBuffer());
