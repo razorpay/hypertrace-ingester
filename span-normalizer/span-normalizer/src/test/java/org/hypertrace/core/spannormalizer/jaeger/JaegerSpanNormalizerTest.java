@@ -1,6 +1,7 @@
 package org.hypertrace.core.spannormalizer.jaeger;
 
 import static org.hypertrace.core.span.constants.v1.Http.HTTP_REQUEST_METHOD;
+import static org.hypertrace.core.spannormalizer.util.EventBuilder.buildEvent;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -14,6 +15,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import org.hypertrace.core.datamodel.AttributeValue;
 import org.hypertrace.core.datamodel.RawSpan;
@@ -150,7 +152,8 @@ public class JaegerSpanNormalizerTest {
     JaegerSpanNormalizer normalizer = JaegerSpanNormalizer.get(ConfigFactory.parseMap(configs));
     Process process = Process.newBuilder().setServiceName("testService").build();
     Span span = Span.newBuilder().setProcess(process).build();
-    RawSpan rawSpan = normalizer.convert("tenant-key", span);
+    RawSpan rawSpan =
+        normalizer.convert(tenantId, span, buildEvent(tenantId, span, Optional.empty()));
     Assertions.assertEquals("testService", rawSpan.getEvent().getServiceName());
     Assertions.assertEquals(
         "testService",
@@ -176,7 +179,7 @@ public class JaegerSpanNormalizerTest {
                     .setKey(RawSpanConstants.getValue(HTTP_REQUEST_METHOD))
                     .setVStr("GET"))
             .build();
-    rawSpan = normalizer.convert("tenant-key", span);
+    rawSpan = normalizer.convert("tenant-key", span, buildEvent(tenantId, span, Optional.empty()));
     Assertions.assertEquals("testService", rawSpan.getEvent().getServiceName());
     Assertions.assertEquals(
         "testService",
@@ -195,7 +198,7 @@ public class JaegerSpanNormalizerTest {
         Span.newBuilder()
             .addTags(KeyValue.newBuilder().setKey("someKey").setVStr("someValue"))
             .build();
-    rawSpan = normalizer.convert("tenant-key", span);
+    rawSpan = normalizer.convert("tenant-key", span, buildEvent(tenantId, span, Optional.empty()));
     Assertions.assertNull(rawSpan.getEvent().getServiceName());
     Assertions.assertNotNull(rawSpan.getEvent().getAttributes().getAttributeMap());
     Assertions.assertNull(
@@ -215,7 +218,8 @@ public class JaegerSpanNormalizerTest {
     Process process = Process.newBuilder().build();
     Span span = Span.newBuilder().setProcess(process).build();
 
-    RawSpan rawSpan = normalizer.convert(tenantId, span);
+    RawSpan rawSpan =
+        normalizer.convert(tenantId, span, buildEvent(tenantId, span, Optional.empty()));
     Assertions.assertNull(rawSpan.getEvent().getServiceName());
     Assertions.assertNull(
         rawSpan

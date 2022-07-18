@@ -16,12 +16,12 @@ dependencies {
   implementation(project(":semantic-convention-utils"))
   implementation(project(":hypertrace-trace-enricher:trace-reader"))
 
-  implementation("org.hypertrace.core.datamodel:data-model:0.1.20")
+  implementation("org.hypertrace.core.datamodel:data-model:0.1.22")
   implementation("org.hypertrace.entity.service:entity-service-client:0.8.5")
   implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.33")
-  implementation("org.hypertrace.core.grpcutils:grpc-client-utils:0.6.2")
+  implementation("org.hypertrace.core.grpcutils:grpc-client-utils:0.7.4")
   implementation("org.hypertrace.config.service:spaces-config-service-api:0.1.0")
-  implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.6.2")
+  implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.7.4")
 
   implementation("com.typesafe:config:1.4.1")
   implementation("org.apache.httpcomponents:httpclient:4.5.13")
@@ -29,17 +29,10 @@ dependencies {
   implementation("org.slf4j:slf4j-api:1.7.30")
   implementation("net.sf.uadetector:uadetector-resources:2014.10")
   implementation("io.reactivex.rxjava3:rxjava:3.0.11")
-
-  constraints {
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1") {
-      because("Denial of Service (DoS) " +
-          "[Medium Severity][https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-2326698] " +
-          "in com.fasterxml.jackson.core:jackson-databind@2.12.2")
-    }
-  }
+  implementation("com.google.guava:guava:31.1-jre")
 
   testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
   testImplementation("org.mockito:mockito-core:3.8.0")
   testImplementation("org.mockito:mockito-junit-jupiter:3.8.0")
-  testImplementation("io.grpc:grpc-core:1.42.0")
+  testImplementation("io.grpc:grpc-core:1.45.1")
 }
