@@ -83,6 +83,8 @@ jobs:
         uses: hypertrace/github-actions/gradle@main
         with:
           args: build dockerBuildImages
+        env:
+          IMAGE_TAG: ${GITHUB_SHA}
 
       - name: push docker image
         uses: hypertrace/github-actions/gradle@main

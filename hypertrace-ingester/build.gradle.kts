@@ -24,7 +24,7 @@ hypertraceDocker {
     }
     namespace.set("razorpay")
   }
-  tag("${project.name}" + "_" + getCommitHash())
+  tag("${project.name}" + "_" + System.getenv("IMAGE_TAG"))
 }
 
 dependencies {
