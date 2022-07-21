@@ -4,6 +4,7 @@ import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuild
 import static org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry.registerCounter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.util.Timestamps;
 import com.typesafe.config.Config;
@@ -14,13 +15,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -334,6 +329,10 @@ public class JaegerSpanNormalizer {
       attributeFieldMap.put(key, JaegerHTTagsConverter.createFromJaegerKeyValue(keyValue));
     }
 
+    if (jaegerSpan.hasProcess()) {
+      addResourceInfoToAttributeFieldMap(jaegerSpan.getProcess(), attributeFieldMap, tenantIdKey);
+    }
+
     // Jaeger Fields - flags, warnings, logs, jaeger service name in the Process
     JaegerFields.Builder jaegerFieldsBuilder = eventBuilder.getJaegerFieldsBuilder();
     // FLAGS
@@ -374,6 +373,45 @@ public class JaegerSpanNormalizer {
     eventBuilder.setMetrics(fastNewBuilder(Metrics.Builder.class).setMetricMap(metricMap).build());
 
     return eventBuilder.build();
+  }
+
+  /* For adding resource's hostname to span tags, method can be used to add resource data like ip address of resource, etc...
+   */
+  private void addResourceInfoToAttributeFieldMap(
+      JaegerSpanInternalModel.Process process,
+      Map<String, AttributeValue> attributeFieldMap,
+      Optional<String> tenantIdKey) {
+    try {
+      List<KeyValue> processTagList = process.getTagsList();
+      Preconditions.checkNotNull(processTagList);
+      if (processTagList.isEmpty()) {
+        return;
+      }
+      for (KeyValue keyValue : processTagList) {
+        if ((keyValue.getKey().equals("host.name"))) {
+          addKVToAttributeFieldMap(keyValue, attributeFieldMap, tenantIdKey);
+          return;
+        }
+      }
+    } catch (Exception e) {
+      LOG.error("error occurred while adding resourceName to event Tags: ", e);
+    }
+  }
+
+  /* Created separate method for adding Key Value Pair to Span tags
+  so that each key value pair goes through all checks and conditions
+  a Key Value pair would normally go through before being added to span tags.
+  */
+  private void addKVToAttributeFieldMap(
+      KeyValue keyValue,
+      Map<String, AttributeValue> attributeFieldMap,
+      Optional<String> tenantIdKey) {
+    String key = keyValue.getKey().toLowerCase();
+    // Do not add the tenant id to the tags.
+    if ((tenantIdKey.isPresent() && key.equals(tenantIdKey.get()))) {
+      return;
+    }
+    attributeFieldMap.put(key, JaegerHTTagsConverter.createFromJaegerKeyValue(keyValue));
   }
 
   // Check if debug log is enabled before calling this method
