@@ -50,11 +50,4 @@ dependencies {
   testImplementation("com.google.code.gson:gson:2.8.9")
 }
 
-fun getCommitHash(): String {
-  val os = com.bmuschko.gradle.docker.shaded.org.apache.commons.io.output.ByteArrayOutputStream()
-  project.exec {
-    commandLine = "git rev-parse --verify HEAD".split(" ")
-    standardOutput = os
-  }
-  return String(os.toByteArray()).trim()
-}
+

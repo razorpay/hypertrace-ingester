@@ -23,14 +23,7 @@ hypertraceDocker {
   tag("${project.name}" + "_" + System.getenv("IMAGE_TAG"))
 }
 
-fun getCommitHash(): String {
-  val os = com.bmuschko.gradle.docker.shaded.org.apache.commons.io.output.ByteArrayOutputStream()
-  project.exec {
-    commandLine = "git rev-parse --verify HEAD".split(" ")
-    standardOutput = os
-  }
-  return String(os.toByteArray()).trim()
-}
+
 
 tasks.test {
   useJUnitPlatform()

@@ -63,12 +63,3 @@ dependencies {
     testImplementation("org.junit-pioneer:junit-pioneer:1.3.8")
     testImplementation("org.apache.kafka:kafka-streams-test-utils:6.0.1-ccs")
 }
-
-fun getCommitHash(): String {
-    val os = com.bmuschko.gradle.docker.shaded.org.apache.commons.io.output.ByteArrayOutputStream()
-    project.exec {
-        commandLine = "git rev-parse --verify HEAD".split(" ")
-        standardOutput = os
-    }
-    return String(os.toByteArray()).trim()
-}
