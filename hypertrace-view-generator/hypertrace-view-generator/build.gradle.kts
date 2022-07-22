@@ -49,5 +49,3 @@ dependencies {
   testImplementation("org.mockito:mockito-core:3.8.0")
   testImplementation("com.google.code.gson:gson:2.8.9")
 }
-
-

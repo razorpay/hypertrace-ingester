@@ -74,5 +74,3 @@ dependencies {
   testImplementation("org.mockito:mockito-core:3.8.0")
   testImplementation("org.apache.kafka:kafka-streams-test-utils:6.0.1-ccs")
 }
-
-

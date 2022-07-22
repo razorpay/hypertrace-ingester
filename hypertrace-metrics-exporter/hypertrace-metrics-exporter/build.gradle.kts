@@ -23,8 +23,6 @@ hypertraceDocker {
   tag("${project.name}" + "_" + System.getenv("IMAGE_TAG"))
 }
 
-
-
 tasks.test {
   useJUnitPlatform()
 }

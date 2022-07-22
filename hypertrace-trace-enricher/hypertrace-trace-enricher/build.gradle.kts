@@ -66,5 +66,3 @@ dependencies {
   testImplementation("org.junit-pioneer:junit-pioneer:1.3.8")
   testImplementation("org.apache.kafka:kafka-streams-test-utils:6.0.1-ccs")
 }
-
-

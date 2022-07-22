@@ -36,15 +36,12 @@ jobs:
             gradle-packages-${{ runner.os }}-${{ github.job }}
             gradle-packages-${{ runner.os }}
 
-      - name: Show Github ENV variables
-        run: env | grep ^GITHUB
-
       - name: Build with Gradle
         uses: hypertrace/github-actions/gradle@main
         with: 
           args: dockerBuildImages
         env:
-          IMAGE_TAG: ${GITHUB_SHA}
+          IMAGE_TAG: ${{ github.sha }}
 
       - name: Verify hypertrace image
         working-directory: ./.github/workflows/hypertrace-ingester
@@ -92,7 +89,7 @@ jobs:
         with: 
           args: dockerBuildImages
         env:
-          IMAGE_TAG: ${GITHUB_SHA}
+          IMAGE_TAG: ${{ github.sha }}
 
       - name: Verify hypertrace image
         working-directory: ./.github/workflows/hypertrace-ingester

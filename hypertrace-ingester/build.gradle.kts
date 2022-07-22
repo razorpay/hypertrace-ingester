@@ -167,5 +167,3 @@ tasks.register<Copy>("createCopySpecForSubJobTest") {
           createCopySpecForSubJob("hypertrace-view-generator", "hypertrace-view-generator", "test")
   ).into("./build/resources/test/configs/")
 }
-
-
