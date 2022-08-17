@@ -264,7 +264,7 @@ public class JaegerSpanNormalizerTest {
             .addTags(9, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
             .build();
 
-    RawSpan rawSpan = normalizer.convert(tenantId, span);
+    RawSpan rawSpan = normalizer.convert(tenantId, span, buildEvent(tenantId, span, Optional.empty()));
 
     var attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
     Map<String, Counter> counterMap = normalizer.getSpanAttributesRedactedCounters();
@@ -299,7 +299,7 @@ public class JaegerSpanNormalizerTest {
             .addTags(0, KeyValue.newBuilder().setKey("otp").setVStr("[redacted]").build())
             .build();
 
-    rawSpan = normalizer.convert(tenantId, span);
+    rawSpan = normalizer.convert(tenantId, span, buildEvent(tenantId, span, Optional.empty()));
     attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
     counterMap = normalizer.getSpanAttributesRedactedCounters();
 
@@ -350,7 +350,7 @@ public class JaegerSpanNormalizerTest {
             .addTags(8, KeyValue.newBuilder().setKey("phoneNum3").setVStr("123456789").build())
             .build();
 
-    RawSpan rawSpan = normalizer.convert(tenantId, span);
+    RawSpan rawSpan = normalizer.convert(tenantId, span, buildEvent(tenantId, span, Optional.empty()));
 
     var attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
     Map<String, Counter> counterMap = normalizer.getSpanAttributesRedactedCounters();

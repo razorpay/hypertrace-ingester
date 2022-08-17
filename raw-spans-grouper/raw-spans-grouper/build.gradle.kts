@@ -41,6 +41,7 @@ dependencies {
     implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.33")
 
     implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-framework:0.1.25")
+    implementation("org.rocksdb:rocksdbjni:7.4.4")
     implementation("com.typesafe:config:1.4.1")
     implementation("de.javakaffee:kryo-serializers:0.45")
     implementation("io.confluent:kafka-avro-serializer:5.5.0")

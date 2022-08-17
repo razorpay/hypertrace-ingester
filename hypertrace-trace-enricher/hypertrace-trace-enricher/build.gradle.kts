@@ -42,6 +42,7 @@ dependencies {
   implementation("com.typesafe:config:1.4.1")
   implementation("com.google.guava:guava:31.1-jre")
   implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-framework:0.1.25")
+  implementation("org.rocksdb:rocksdbjni:7.4.4")
 
   // Required for the GRPC clients.
   runtimeOnly("io.grpc:grpc-netty:1.45.1")
