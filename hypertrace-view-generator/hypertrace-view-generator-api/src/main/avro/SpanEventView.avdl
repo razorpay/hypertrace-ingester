@@ -47,6 +47,9 @@ protocol SpanEventViewProtocol {
     // duration
     long duration_millis = 0;
 
+    // duration micro
+    double duration_micros = 0;
+
     // span id of an entry api span.
     union { null, bytes } api_trace_id = null;
 

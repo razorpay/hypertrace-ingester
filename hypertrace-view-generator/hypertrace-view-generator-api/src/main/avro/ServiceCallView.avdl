@@ -41,6 +41,9 @@ protocol ServiceCallViewProtocol {
     long end_time_millis = 0;
     long duration_millis = 0;
 
+    // duration micro
+    double duration_micros = 0;
+
     // Error count, which will be either a 0 or 1 where one indicates that this
     // api/service call has erred out.
     int error_count = 0;

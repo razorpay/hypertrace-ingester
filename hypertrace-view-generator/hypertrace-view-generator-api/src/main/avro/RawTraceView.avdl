@@ -20,6 +20,9 @@ protocol TraceViewProtocol {
     //total time for the trace
     long duration_millis = 0;
 
+    // duration micro
+    double duration_micros = 0;
+
     //How deep was the call.
     int num_services = 0;
 

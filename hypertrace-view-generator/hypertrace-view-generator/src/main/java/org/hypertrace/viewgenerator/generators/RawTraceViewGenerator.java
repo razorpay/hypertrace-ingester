@@ -43,6 +43,9 @@ public class RawTraceViewGenerator extends BaseViewGenerator<RawTraceView> {
     builder.setEndTimeMillis(structuredTrace.getEndTimeMillis());
     builder.setDurationMillis(
         structuredTrace.getEndTimeMillis() - structuredTrace.getStartTimeMillis());
+    builder.setDurationMicros(
+        structuredTrace.getMetrics().getMetricMap().get("Duration").getValue());
+
     Set<String> services = new HashSet<>();
     for (Event event : structuredTrace.getEventList()) {
       String serviceName = EnrichedSpanUtils.getServiceName(event);
