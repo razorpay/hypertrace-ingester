@@ -20,7 +20,7 @@ jobs:
         uses: hypertrace/github-actions/checksum@main
 
       - name: Cache packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.gradle
           key: gradle-packages-${{ runner.os }}-${{ github.job }}-${{ hashFiles('**/checksum.txt') }}
@@ -65,7 +65,7 @@ jobs:
         uses: hypertrace/github-actions/checksum@main
 
       - name: Cache packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.gradle
           key: gradle-packages-${{ runner.os }}-${{ github.job }}-${{ hashFiles('**/checksum.txt') }}
