@@ -3,7 +3,7 @@ on:
   push:
   pull_request_target:
     branches:
-      - main
+      - rzp_main
 # disabling while testing ci flow
 jobs:
   test:
