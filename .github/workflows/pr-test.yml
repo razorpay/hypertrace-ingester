@@ -4,7 +4,7 @@ on:
   pull_request_target: 
     branches:
       - main  
-# disabling while testing ci flow
+# disabling while testing ci flow x
 jobs:
   test:
     runs-on: ubuntu-20.04
