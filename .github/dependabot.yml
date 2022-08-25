@@ -9,16 +9,8 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    commit-message:
-      prefix: "chore:"
-      include: "scope"
-      target-branch: "rzp_main"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    commit-message:
-      prefix: "chore:"
-      include: "scope"
-      target-branch: "rzp_main"
