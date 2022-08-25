@@ -10,7 +10,7 @@ jobs:
     steps:
       # Set fetch-depth: 0 to fetch commit history and tags for use in version calculation
       - name: Check out code
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         with:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
@@ -42,7 +42,7 @@ jobs:
      # Set fetch-depth: 0 to fetch commit history and tags for use in version calculation
     steps:
       - name: Check out code
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         with:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
@@ -55,7 +55,7 @@ jobs:
     steps:
        # Set fetch-depth: 0 to fetch commit history and tags for use in version calculation
       - name: Check out code
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         with:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
@@ -100,7 +100,7 @@ jobs:
 #     steps:
 #     # Set fetch-depth: 0 to fetch commit history and tags for use in version calculation
 #       - name: Check out code
-#         uses: actions/checkout@v2.3.4
+#         uses: actions/checkout@v3
 #         with:
 #           ref: ${{github.event.pull_request.head.ref}}
 #           repository: ${{github.event.pull_request.head.repo.full_name}}
