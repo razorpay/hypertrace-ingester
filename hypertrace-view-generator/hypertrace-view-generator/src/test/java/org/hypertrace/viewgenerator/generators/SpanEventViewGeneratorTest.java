@@ -18,12 +18,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.specific.SpecificDatumReader;
-import org.hypertrace.core.datamodel.AttributeValue;
-import org.hypertrace.core.datamodel.Attributes;
-import org.hypertrace.core.datamodel.Entity;
-import org.hypertrace.core.datamodel.Event;
-import org.hypertrace.core.datamodel.Metrics;
-import org.hypertrace.core.datamodel.StructuredTrace;
+import org.hypertrace.core.datamodel.*;
 import org.hypertrace.core.datamodel.shared.trace.AttributeValueCreator;
 import org.hypertrace.core.span.constants.RawSpanConstants;
 import org.hypertrace.traceenricher.enrichedspan.constants.EnrichedSpanConstants;
@@ -36,6 +31,7 @@ import org.hypertrace.viewgenerator.generators.ViewGeneratorState.TraceState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
 
 public class SpanEventViewGeneratorTest {
   private SpanEventViewGenerator spanEventViewGenerator;
@@ -177,6 +173,9 @@ public class SpanEventViewGeneratorTest {
 
   @Test
   public void testExitCallsInfo() {
+    MetricValue metricValue = fastNewBuilder(MetricValue.Builder.class).setValue(645.0).build();
+    Map<String, MetricValue> metricMap = new HashMap<>();
+    metricMap.put("Duration", metricValue);
     StructuredTrace.Builder traceBuilder = StructuredTrace.newBuilder();
     traceBuilder
         .setCustomerId("customer1")
@@ -198,12 +197,12 @@ public class SpanEventViewGeneratorTest {
                     .setEntityIdList(Collections.singletonList("sample-entity-id"))
                     .setStartTimeMillis(System.currentTimeMillis())
                     .setEndTimeMillis(System.currentTimeMillis())
-                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+                    .setMetrics(Metrics.newBuilder().setMetricMap(metricMap).build())
                     .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
                     .setEnrichedAttributesBuilder(
                         Attributes.newBuilder().setAttributeMap(Maps.newHashMap()))
                     .build()))
-        .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+        .setMetrics(Metrics.newBuilder().setMetricMap(metricMap).build())
         .setEntityEdgeList(new ArrayList<>())
         .setEventEdgeList(new ArrayList<>())
         .setEntityEventEdgeList(new ArrayList<>())
@@ -239,7 +238,7 @@ public class SpanEventViewGeneratorTest {
                     .setEntityIdList(Collections.singletonList("sample-entity-id"))
                     .setStartTimeMillis(System.currentTimeMillis())
                     .setEndTimeMillis(System.currentTimeMillis())
-                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+                    .setMetrics(Metrics.newBuilder().setMetricMap(metricMap).build())
                     .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
                     .setEnrichedAttributesBuilder(
                         Attributes.newBuilder().setAttributeMap(spanAttributes))
@@ -255,6 +254,9 @@ public class SpanEventViewGeneratorTest {
 
   @Test
   public void testApiTraceErrorSpanCount() {
+    MetricValue metricValue = fastNewBuilder(MetricValue.Builder.class).setValue(645.0).build();
+    Map<String, MetricValue> metricMap = new HashMap<>();
+    metricMap.put("Duration", metricValue);
     StructuredTrace.Builder traceBuilder = StructuredTrace.newBuilder();
     traceBuilder
         .setCustomerId("customer1")
@@ -276,12 +278,12 @@ public class SpanEventViewGeneratorTest {
                     .setEntityIdList(Collections.singletonList("sample-entity-id"))
                     .setStartTimeMillis(System.currentTimeMillis())
                     .setEndTimeMillis(System.currentTimeMillis())
-                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+                    .setMetrics(Metrics.newBuilder().setMetricMap(metricMap).build())
                     .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
                     .setEnrichedAttributesBuilder(
                         Attributes.newBuilder().setAttributeMap(Maps.newHashMap()))
                     .build()))
-        .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+        .setMetrics(Metrics.newBuilder().setMetricMap(metricMap).build())
         .setEntityEdgeList(new ArrayList<>())
         .setEventEdgeList(new ArrayList<>())
         .setEntityEventEdgeList(new ArrayList<>())
@@ -308,7 +310,7 @@ public class SpanEventViewGeneratorTest {
                     .setEntityIdList(Collections.singletonList("sample-entity-id"))
                     .setStartTimeMillis(System.currentTimeMillis())
                     .setEndTimeMillis(System.currentTimeMillis())
-                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+                    .setMetrics(Metrics.newBuilder().setMetricMap(metricMap).build())
                     .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
                     .setEnrichedAttributesBuilder(
                         Attributes.newBuilder().setAttributeMap(spanAttributes))
