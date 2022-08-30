@@ -366,8 +366,9 @@ public class JaegerSpanNormalizer {
     // EVENT METRICS
     Map<String, MetricValue> metricMap = new HashMap<>();
     MetricValue durationMetric =
-        fastNewBuilder(MetricValue.Builder.class).setValue(
-            jaegerSpan.getDuration().getSeconds()
+        fastNewBuilder(MetricValue.Builder.class)
+            .setValue(
+                jaegerSpan.getDuration().getSeconds()
                     + (long) jaegerSpan.getDuration().getNanos() / 1000.0)
             .build();
     metricMap.put("Duration", durationMetric);

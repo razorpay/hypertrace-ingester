@@ -1,5 +1,6 @@
 package org.hypertrace.viewgenerator.generators;
 
+import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
 import static org.hypertrace.core.span.constants.v1.Http.HTTP_PATH;
 import static org.hypertrace.core.span.constants.v1.Http.HTTP_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,7 +32,6 @@ import org.hypertrace.viewgenerator.generators.ViewGeneratorState.TraceState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
 
 public class SpanEventViewGeneratorTest {
   private SpanEventViewGenerator spanEventViewGenerator;
