@@ -4,6 +4,7 @@ import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuild
 import static org.hypertrace.core.span.constants.v1.Http.HTTP_PATH;
 import static org.hypertrace.core.span.constants.v1.Http.HTTP_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -214,6 +215,7 @@ public class SpanEventViewGeneratorTest {
     List<SpanEventView> list = spanEventViewGenerator.process(trace);
     assertEquals(Maps.newHashMap(), list.get(0).getApiCalleeNameCount());
     assertEquals(0, list.get(0).getApiExitCalls());
+    assertTrue(trace.getMetrics().getMetricMap().get("Duration").getValue().equals(645.0));
 
     Map<String, AttributeValue> spanAttributes = new HashMap<>();
     spanAttributes.put(
@@ -250,6 +252,7 @@ public class SpanEventViewGeneratorTest {
     list = spanEventViewGenerator.process(trace);
     assertEquals(calleeNameCount, list.get(0).getApiCalleeNameCount());
     assertEquals(5, list.get(0).getApiExitCalls());
+    assertTrue(trace.getMetrics().getMetricMap().get("Duration").getValue().equals(645.0));
   }
 
   @Test
