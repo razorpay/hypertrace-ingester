@@ -176,7 +176,7 @@ public class SpanEventViewGeneratorTest {
   public void testExitCallsInfo() {
     MetricValue metricValue = fastNewBuilder(MetricValue.Builder.class).setValue(645.0).build();
     Map<String, MetricValue> metricMap = new HashMap<>();
-    metricMap.put("Duration", metricValue);
+    metricMap.put("Duration-micro", metricValue);
     StructuredTrace.Builder traceBuilder = StructuredTrace.newBuilder();
     traceBuilder
         .setCustomerId("customer1")
@@ -215,7 +215,7 @@ public class SpanEventViewGeneratorTest {
     List<SpanEventView> list = spanEventViewGenerator.process(trace);
     assertEquals(Maps.newHashMap(), list.get(0).getApiCalleeNameCount());
     assertEquals(0, list.get(0).getApiExitCalls());
-    assertTrue(trace.getMetrics().getMetricMap().get("Duration").getValue().equals(645.0));
+    assertTrue(trace.getMetrics().getMetricMap().get("Duration-micro").getValue().equals(645.0));
 
     Map<String, AttributeValue> spanAttributes = new HashMap<>();
     spanAttributes.put(
@@ -252,14 +252,14 @@ public class SpanEventViewGeneratorTest {
     list = spanEventViewGenerator.process(trace);
     assertEquals(calleeNameCount, list.get(0).getApiCalleeNameCount());
     assertEquals(5, list.get(0).getApiExitCalls());
-    assertTrue(trace.getMetrics().getMetricMap().get("Duration").getValue().equals(645.0));
+    assertTrue(trace.getMetrics().getMetricMap().get("Duration-micro").getValue().equals(645.0));
   }
 
   @Test
   public void testApiTraceErrorSpanCount() {
     MetricValue metricValue = fastNewBuilder(MetricValue.Builder.class).setValue(645.0).build();
     Map<String, MetricValue> metricMap = new HashMap<>();
-    metricMap.put("Duration", metricValue);
+    metricMap.put("Duration-micro", metricValue);
     StructuredTrace.Builder traceBuilder = StructuredTrace.newBuilder();
     traceBuilder
         .setCustomerId("customer1")
@@ -324,6 +324,7 @@ public class SpanEventViewGeneratorTest {
     spanEventViewGenerator = new SpanEventViewGenerator();
     list = spanEventViewGenerator.process(trace);
     assertEquals(5, list.get(0).getApiTraceErrorSpanCount());
+    assertTrue(trace.getMetrics().getMetricMap().get("Duration-micro").getValue().equals(645.0));
   }
 
   private Event createMockEventWithAttribute(String key, String value) {
