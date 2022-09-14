@@ -50,7 +50,7 @@ public class RawServiceViewGenerator extends BaseViewGenerator<RawServiceView> {
         builder.setStartTimeMillis(event.getStartTimeMillis());
         builder.setEndTimeMillis(event.getEndTimeMillis());
         builder.setDurationMillis(event.getEndTimeMillis() - event.getStartTimeMillis());
-        builder.setDurationMicros(event.getMetrics().getMetricMap().get("Duration").getValue());
+        builder.setDurationMicros(getDurationMetricValue(event));
         builder.setTransactionName(getTransactionName(structuredTrace));
 
         String spanType = EnrichedSpanUtils.getSpanType(event);
