@@ -148,7 +148,15 @@ public class JaegerSpanNormalizerTest {
     Map<String, Object> configs = new HashMap<>(getCommonConfig());
     configs.putAll(Map.of("processor", Map.of("defaultTenantId", tenantId)));
     JaegerSpanNormalizer normalizer = JaegerSpanNormalizer.get(ConfigFactory.parseMap(configs));
-    Process process = Process.newBuilder().setServiceName("testService").build();
+    Process process =
+        Process.newBuilder()
+            .setServiceName("testService")
+            .addTags(
+                KeyValue.newBuilder()
+                    .setKey("host.name")
+                    .setVStr("apache-pinot-zookeeper-bitnami-2")
+                    .build())
+            .build();
     Span span = Span.newBuilder().setProcess(process).build();
     RawSpan rawSpan = normalizer.convert("tenant-key", span);
     Assertions.assertEquals("testService", rawSpan.getEvent().getServiceName());
@@ -212,7 +220,14 @@ public class JaegerSpanNormalizerTest {
     Map<String, Object> configs = new HashMap<>(getCommonConfig());
     configs.putAll(Map.of("processor", Map.of("defaultTenantId", tenantId)));
     JaegerSpanNormalizer normalizer = JaegerSpanNormalizer.get(ConfigFactory.parseMap(configs));
-    Process process = Process.newBuilder().build();
+    Process process =
+        Process.newBuilder()
+            .addTags(
+                KeyValue.newBuilder()
+                    .setKey("host.name")
+                    .setVStr("apache-pinot-zookeeper-bitnami-2")
+                    .build())
+            .build();
     Span span = Span.newBuilder().setProcess(process).build();
 
     RawSpan rawSpan = normalizer.convert(tenantId, span);
@@ -244,7 +259,14 @@ public class JaegerSpanNormalizerTest {
     Map<String, Object> configs = new HashMap<>(getCommonConfig());
     configs.putAll(Map.of("processor", Map.of("defaultTenantId", tenantId)));
     JaegerSpanNormalizer normalizer = JaegerSpanNormalizer.get(ConfigFactory.parseMap(configs));
-    Process process = Process.newBuilder().build();
+    Process process =
+        Process.newBuilder()
+            .addTags(
+                KeyValue.newBuilder()
+                    .setKey("host.name")
+                    .setVStr("apache-pinot-zookeeper-bitnami-2")
+                    .build())
+            .build();
     Span span =
         Span.newBuilder()
             .setProcess(process)
@@ -331,7 +353,11 @@ public class JaegerSpanNormalizerTest {
     Map<String, Object> configs = new HashMap<>(config);
     configs.putAll(Map.of("processor", Map.of("defaultTenantId", tenantId)));
     JaegerSpanNormalizer normalizer = JaegerSpanNormalizer.get(ConfigFactory.parseMap(configs));
-    Process process = Process.newBuilder().build();
+    Process process =
+        Process.newBuilder()
+            .addTags(KeyValue.newBuilder().setKey("host.name").setVStr("RZP2709").build())
+            .build();
+
     Span span =
         Span.newBuilder()
             .setProcess(process)
