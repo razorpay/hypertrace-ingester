@@ -30,6 +30,7 @@ import org.hypertrace.traceenricher.enrichedspan.constants.v1.BoundaryTypeValue;
 import org.hypertrace.traceenricher.enrichedspan.constants.v1.Protocol;
 import org.hypertrace.viewgenerator.api.SpanEventView;
 import org.hypertrace.viewgenerator.generators.ViewGeneratorState.TraceState;
+import org.hypertrace.viewgenerator.generators.utils.TestUtilities;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -140,15 +141,7 @@ public class SpanEventViewGeneratorTest {
 
   @Test
   public void testSpanEventViewGen_HotrodTrace() throws IOException {
-    URL resource =
-        Thread.currentThread().getContextClassLoader().getResource("StructuredTrace-Hotrod.avro");
-
-    SpecificDatumReader<StructuredTrace> datumReader =
-        new SpecificDatumReader<>(StructuredTrace.getClassSchema());
-    DataFileReader<StructuredTrace> dfrStructuredTrace =
-        new DataFileReader<>(new File(resource.getPath()), datumReader);
-    StructuredTrace trace = dfrStructuredTrace.next();
-    dfrStructuredTrace.close();
+    StructuredTrace trace = TestUtilities.getSampleHotRodTrace();
 
     TraceState traceState = new TraceState(trace);
     verifyGetExitSpanToApiEntrySpan_HotrodTrace(trace, traceState);
