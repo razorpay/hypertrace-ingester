@@ -371,7 +371,7 @@ public class JaegerSpanNormalizer {
                 jaegerSpan.getDuration().getSeconds()
                     + (long) jaegerSpan.getDuration().getNanos() / 1000.0)
             .build();
-    metricMap.put("Duration", durationMetric);
+    metricMap.put("Duration-micro", durationMetric);
 
     eventBuilder.setMetrics(fastNewBuilder(Metrics.Builder.class).setMetricMap(metricMap).build());
 
