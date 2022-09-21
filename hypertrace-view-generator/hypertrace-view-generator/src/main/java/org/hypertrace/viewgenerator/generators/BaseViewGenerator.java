@@ -51,7 +51,7 @@ public abstract class BaseViewGenerator<OUT extends GenericRecord>
   }
 
   static double getDurationMetricValueTrace(StructuredTrace structuredTrace) {
-    MetricValue value = structuredTrace.getMetrics().getMetricMap().get("Duration-micro");
+    MetricValue value = structuredTrace.getEventList().get(0).getMetrics().getMetricMap().get("Duration-micro");
     return value.getValue();
   }
 
