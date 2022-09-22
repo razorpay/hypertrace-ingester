@@ -1,7 +1,6 @@
 package org.hypertrace.traceenricher.util;
 
 import java.util.*;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hypertrace.core.datamodel.Attributes;
 import org.hypertrace.core.datamodel.Event;
@@ -40,20 +39,22 @@ public class EnricherUtil {
     return Collections.unmodifiableMap(attributes);
   }
 
-  public static Optional<org.hypertrace.core.datamodel.AttributeValue> getAttribute(Attributes attributes, String key) {
+  public static Optional<org.hypertrace.core.datamodel.AttributeValue> getAttribute(
+      Attributes attributes, String key) {
     return Optional.ofNullable(attributes)
-            .map(Attributes::getAttributeMap)
-            .map(attributeMap -> attributeMap.get(key));
+        .map(Attributes::getAttributeMap)
+        .map(attributeMap -> attributeMap.get(key));
   }
 
-  public static Optional<org.hypertrace.core.datamodel.AttributeValue> getResourceAttribute(StructuredTrace trace, Event span, String key) {
+  public static Optional<org.hypertrace.core.datamodel.AttributeValue> getResourceAttribute(
+      StructuredTrace trace, Event span, String key) {
     if (span.getResourceIndex() < 0 || span.getResourceIndex() >= trace.getResourceList().size()) {
       return Optional.empty();
     }
 
     return Optional.of(trace.getResourceList().get(span.getResourceIndex()))
-            .map(Resource::getAttributes)
-            .flatMap(attributes -> getAttribute(attributes, key));
+        .map(Resource::getAttributes)
+        .flatMap(attributes -> getAttribute(attributes, key));
   }
 
   public static void setAttributeForFirstExistingKey(
