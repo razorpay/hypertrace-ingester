@@ -35,7 +35,6 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
   @Override
   public void enrichEvent(StructuredTrace trace, Event event) {
     try {
-      LOGGER.info("runnning ResourceAttributeEnricher.");
       if (resourceAttributesToAdd.isEmpty()) {
         return;
       }
@@ -55,7 +54,6 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
         resourceAttribute.ifPresent(
             attributeValue -> attributeMap.putIfAbsent(resourceAttributeKey, attributeValue));
       }
-      LOGGER.info("enriched: {}", event.getAttributes().getAttributeMap());
     } catch (Exception e) {
       LOGGER.error("Exception while enriching event with resource attributes.", e);
     }
