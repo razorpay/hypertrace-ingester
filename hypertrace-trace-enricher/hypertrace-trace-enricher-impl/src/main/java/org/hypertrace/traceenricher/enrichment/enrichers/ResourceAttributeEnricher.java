@@ -53,16 +53,20 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
         }
         Optional<AttributeValue> resourceAttributeMaybe =
             getResourceAttribute(trace, event, resourceAttributeKeyToMatch);
+
         resourceAttributeMaybe.ifPresent(
-            attributeValue -> {
-              if (resourceAttributeKey.equals(NODE_SELECTOR_KEY)) {
-                attributeValue.setValue(
-                    attributeValue
-                        .getValue()
-                        .substring(attributeValue.getValue().lastIndexOf('/') + 1));
-              }
-              attributeMap.putIfAbsent(resourceAttributeKey, attributeValue);
-            });
+            attributeValue ->
+                attributeMap.computeIfAbsent(
+                    resourceAttributeKey,
+                    key -> {
+                      if (resourceAttributeKey.equals(NODE_SELECTOR_KEY)) {
+                        attributeValue.setValue(
+                            attributeValue
+                                .getValue()
+                                .substring(attributeValue.getValue().lastIndexOf('/') + 1));
+                      }
+                      return attributeValue;
+                    }));
       }
     } catch (Exception e) {
       LOGGER.error(
