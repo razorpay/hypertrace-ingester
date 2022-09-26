@@ -14,6 +14,7 @@ import org.hypertrace.traceenricher.enrichment.clients.ClientRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Enricher to add resource attributes to the spans. As of now resource attributes are attached from process tags.*/
 public class ResourceAttributeEnricher extends AbstractTraceEnricher {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ResourceAttributeEnricher.class);
