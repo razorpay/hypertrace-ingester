@@ -139,7 +139,7 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
             .setEventId(createByteBuffer("event4"))
             .setCustomerId(TENANT_ID)
             .build();
-    event3.setResourceIndex(3);
+    event4.setResourceIndex(3);
     resourceAttributeEnricher.enrichEvent(structuredTrace, event4);
     assertEquals(
         "worker-generic", event4.getAttributes().getAttributeMap().get("node.selector").getValue());
