@@ -14,7 +14,10 @@ import org.hypertrace.traceenricher.enrichment.clients.ClientRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Enricher to add resource attributes to the spans. As of now resource attributes are attached from process tags.*/
+/**
+ * Enricher to add resource attributes to the spans. As of now resource attributes are attached from
+ * process tags.
+ */
 public class ResourceAttributeEnricher extends AbstractTraceEnricher {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ResourceAttributeEnricher.class);
@@ -30,12 +33,10 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
 
   @Override
   public void init(Config enricherConfig, ClientRegistry clientRegistry) {
-    if (enricherConfig.hasPath(RESOURCE_ATTRIBUTES_CONFIG_KEY)) {
-      resourceAttributesToAdd = enricherConfig.getStringList(RESOURCE_ATTRIBUTES_CONFIG_KEY);
-      resourceAttributeKeysToMatch =
-          enricherConfig.getConfig(ATTRIBUTES_TO_MATCH_CONFIG_KEY).entrySet().stream()
-              .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().unwrapped().toString()));
-    }
+    resourceAttributesToAdd = enricherConfig.getStringList(RESOURCE_ATTRIBUTES_CONFIG_KEY);
+    resourceAttributeKeysToMatch =
+        enricherConfig.getConfig(ATTRIBUTES_TO_MATCH_CONFIG_KEY).entrySet().stream()
+            .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().unwrapped().toString()));
   }
 
   @Override
@@ -72,12 +73,8 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
   }
 
   private boolean isValidEvent(Event event) {
-    if (resourceAttributesToAdd.isEmpty()) {
-      return false;
-    }
-    if (event.getResourceIndex() < 0) {
-      return false;
-    }
-    return (event.getAttributes() != null) && (event.getAttributes().getAttributeMap() != null);
+    return (event.getResourceIndex() >= 0)
+        && (event.getAttributes() != null)
+        && (event.getAttributes().getAttributeMap() != null);
   }
 }
