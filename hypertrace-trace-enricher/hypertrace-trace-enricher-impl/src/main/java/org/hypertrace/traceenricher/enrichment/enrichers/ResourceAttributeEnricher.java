@@ -55,11 +55,13 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
         resourceAttribute.ifPresent(
             attributeValue -> {
               if (NODE_SELECTOR_KEY.equals(resourceAttributeKey)) {
-                attributeValue.setValue(attributeValue.getValue().substring(attributeValue.getValue().lastIndexOf("/")));
+                attributeValue.setValue(
+                    attributeValue
+                        .getValue()
+                        .substring(attributeValue.getValue().lastIndexOf("/")));
               }
               attributeMap.putIfAbsent(resourceAttributeKey, attributeValue);
-            }
-        );
+            });
       }
     } catch (Exception e) {
       LOGGER.error("Exception while enriching event with resource attributes.", e);
