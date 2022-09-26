@@ -3,10 +3,9 @@ package org.hypertrace.traceenricher.enrichment.enrichers;
 import static org.hypertrace.traceenricher.util.EnricherUtil.getResourceAttribute;
 
 import com.typesafe.config.Config;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import org.hypertrace.core.datamodel.AttributeValue;
 import org.hypertrace.core.datamodel.Event;
 import org.hypertrace.core.datamodel.StructuredTrace;
@@ -20,7 +19,9 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
   private static final Logger LOGGER = LoggerFactory.getLogger(ResourceAttributeEnricher.class);
   private static final String RESOURCE_ATTRIBUTES_CONFIG_KEY = "attributes";
   private static final String NODE_SELECTOR_KEY = "node.selector";
+  private static final String ATTRIBUTES_TO_MATCH_CONFIG_KEY = "attributesToMatch";
   private List<String> resourceAttributesToAdd = new ArrayList<>();
+  private Map<String, String> resourceAttributeKeysToMatch = new HashMap<>();
 
   public List<String> getResourceAttributesToAdd() {
     return resourceAttributesToAdd;
@@ -30,17 +31,10 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
   public void init(Config enricherConfig, ClientRegistry clientRegistry) {
     if (enricherConfig.hasPath(RESOURCE_ATTRIBUTES_CONFIG_KEY)) {
       resourceAttributesToAdd = enricherConfig.getStringList(RESOURCE_ATTRIBUTES_CONFIG_KEY);
+      resourceAttributeKeysToMatch =
+          enricherConfig.getConfig(ATTRIBUTES_TO_MATCH_CONFIG_KEY).entrySet().stream()
+              .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().unwrapped().toString()));
     }
-  }
-
-  private boolean isValidEvent(Event event) {
-    if (resourceAttributesToAdd.isEmpty()) {
-      return false;
-    }
-    if (event.getResourceIndex() < 0) {
-      return false;
-    }
-    return (event.getAttributes() != null) && (event.getAttributes().getAttributeMap() != null);
   }
 
   @Override
@@ -51,11 +45,15 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
       }
       Map<String, AttributeValue> attributeMap = event.getAttributes().getAttributeMap();
       for (String resourceAttributeKey : resourceAttributesToAdd) {
+        String resourceAttributeKeyToMatch = resourceAttributeKey;
+        if (resourceAttributeKeysToMatch.containsKey(resourceAttributeKey)) {
+          resourceAttributeKeyToMatch = resourceAttributeKeysToMatch.get(resourceAttributeKey);
+        }
         Optional<AttributeValue> resourceAttributeMaybe =
-            getResourceAttribute(trace, event, resourceAttributeKey);
+            getResourceAttribute(trace, event, resourceAttributeKeyToMatch);
         resourceAttributeMaybe.ifPresent(
             attributeValue -> {
-              if (NODE_SELECTOR_KEY.equals(resourceAttributeKey)) {
+              if (resourceAttributeKey.equals(NODE_SELECTOR_KEY)) {
                 attributeValue.setValue(
                     attributeValue
                         .getValue()
@@ -70,5 +68,15 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
           event.getEventId(),
           e);
     }
+  }
+
+  private boolean isValidEvent(Event event) {
+    if (resourceAttributesToAdd.isEmpty()) {
+      return false;
+    }
+    if (event.getResourceIndex() < 0) {
+      return false;
+    }
+    return (event.getAttributes() != null) && (event.getAttributes().getAttributeMap() != null);
   }
 }

@@ -92,8 +92,7 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
         resourceAttributeEnricher.getResourceAttributesToAdd().size() - 2,
         event.getAttributes().getAttributeMap().size());
     assertEquals(
-        "test-56f5d554c-5swkj",
-        event.getAttributes().getAttributeMap().get("host.name").getValue());
+        "test-56f5d554c-5swkj", event.getAttributes().getAttributeMap().get("pod.name").getValue());
     assertEquals(
         "01188498a468b5fef1eb4accd63533297c195a73",
         event.getAttributes().getAttributeMap().get("service.version").getValue());
@@ -143,6 +142,7 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
     resourceAttributeEnricher.enrichEvent(structuredTrace, event4);
     assertEquals(
         "worker-generic", event4.getAttributes().getAttributeMap().get("node.selector").getValue());
+    assertEquals("pod1", event4.getAttributes().getAttributeMap().get("pod.name").getValue());
   }
 
   private Resource getResource4() {
@@ -150,6 +150,7 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
         new HashMap<>() {
           {
             put("node.selector", AttributeValue.newBuilder().setValue("worker-generic").build());
+            put("host.name", AttributeValue.newBuilder().setValue("pod1").build());
           }
         };
     return Resource.newBuilder()
