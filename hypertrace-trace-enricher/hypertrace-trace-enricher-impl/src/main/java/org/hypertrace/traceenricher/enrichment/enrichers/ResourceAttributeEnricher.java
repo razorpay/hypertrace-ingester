@@ -33,26 +33,27 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
     }
   }
 
+  private boolean isValidEvent(Event event) {
+    if (resourceAttributesToAdd.isEmpty()) {
+      return false;
+    }
+    if (event.getResourceIndex() < 0) {
+      return false;
+    }
+    return (event.getAttributes() != null) && (event.getAttributes().getAttributeMap() != null);
+  }
+
   @Override
   public void enrichEvent(StructuredTrace trace, Event event) {
     try {
-      if (resourceAttributesToAdd.isEmpty()) {
-        return;
-      }
-      if (event.getResourceIndex() < 0) {
-        return;
-      }
-      if (event.getAttributes() == null) {
+      if (!isValidEvent(event)) {
         return;
       }
       Map<String, AttributeValue> attributeMap = event.getAttributes().getAttributeMap();
-      if (attributeMap == null) {
-        return;
-      }
       for (String resourceAttributeKey : resourceAttributesToAdd) {
-        Optional<AttributeValue> resourceAttribute =
+        Optional<AttributeValue> resourceAttributeMaybe =
             getResourceAttribute(trace, event, resourceAttributeKey);
-        resourceAttribute.ifPresent(
+        resourceAttributeMaybe.ifPresent(
             attributeValue -> {
               if (NODE_SELECTOR_KEY.equals(resourceAttributeKey)) {
                 attributeValue.setValue(
@@ -64,7 +65,10 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
             });
       }
     } catch (Exception e) {
-      LOGGER.error("Exception while enriching event with resource attributes.", e);
+      LOGGER.error(
+          "Exception while enriching event with resource attributes having event id: {}",
+          event.getEventId(),
+          e);
     }
   }
 }
