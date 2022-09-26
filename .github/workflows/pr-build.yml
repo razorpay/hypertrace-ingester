@@ -1,9 +1,6 @@
 name: build and validate
 on:
   push:
-  pull_request_target:
-    branches:
-      - rzp_main
 jobs:
   validate-avros:
     runs-on: ubuntu-20.04
