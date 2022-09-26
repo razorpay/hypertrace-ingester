@@ -27,10 +27,6 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
   private List<String> resourceAttributesToAdd = new ArrayList<>();
   private Map<String, String> resourceAttributeKeysToMatch = new HashMap<>();
 
-  public List<String> getResourceAttributesToAdd() {
-    return resourceAttributesToAdd;
-  }
-
   @Override
   public void init(Config enricherConfig, ClientRegistry clientRegistry) {
     resourceAttributesToAdd = enricherConfig.getStringList(RESOURCE_ATTRIBUTES_CONFIG_KEY);

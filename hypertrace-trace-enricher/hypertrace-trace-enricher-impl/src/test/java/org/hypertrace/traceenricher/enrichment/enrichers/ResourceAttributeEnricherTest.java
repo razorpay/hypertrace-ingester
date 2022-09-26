@@ -23,6 +23,8 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
   private final ResourceAttributeEnricher resourceAttributeEnricher =
       new ResourceAttributeEnricher();
 
+  private List<String> resourceAttributesToAddList;
+
   @BeforeAll
   public void setup() {
     String configFilePath =
@@ -37,8 +39,9 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
       throw new RuntimeException(
           "Cannot find enricher config for ResourceAttributeEnricher in " + configs);
     }
-    resourceAttributeEnricher.init(
-        configs.getConfig("enricher.ResourceAttributeEnricher"), mock(ClientRegistry.class));
+    Config enricherConfig = configs.getConfig("enricher.ResourceAttributeEnricher");
+    resourceAttributesToAddList = enricherConfig.getStringList("attributes");
+    resourceAttributeEnricher.init(enricherConfig, mock(ClientRegistry.class));
   }
 
   @Test
@@ -89,8 +92,7 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
     event.setResourceIndex(0);
     resourceAttributeEnricher.enrichEvent(structuredTrace, event);
     assertEquals(
-        resourceAttributeEnricher.getResourceAttributesToAdd().size() - 2,
-        event.getAttributes().getAttributeMap().size());
+        resourceAttributesToAddList.size() - 2, event.getAttributes().getAttributeMap().size());
     assertEquals(
         "test-56f5d554c-5swkj", event.getAttributes().getAttributeMap().get("pod.name").getValue());
     assertEquals(
@@ -112,8 +114,7 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
     addAttribute(event2, "cluster.name", "default");
     resourceAttributeEnricher.enrichEvent(structuredTrace, event2);
     assertEquals(
-        resourceAttributeEnricher.getResourceAttributesToAdd().size(),
-        event2.getAttributes().getAttributeMap().size());
+        resourceAttributesToAddList.size(), event2.getAttributes().getAttributeMap().size());
     assertEquals("123", event2.getAttributes().getAttributeMap().get("service.version").getValue());
     assertEquals(
         "default", event2.getAttributes().getAttributeMap().get("cluster.name").getValue());
