@@ -45,17 +45,6 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
   }
 
   @Test
-  public void noAttributes() {
-    Event event = mock(Event.class);
-    when(event.getAttributes()).thenReturn(null);
-    resourceAttributeEnricher.enrichEvent(null, event);
-
-    when(event.getAttributes()).thenReturn(Attributes.newBuilder().build());
-    when(event.getAttributes().getAttributeMap()).thenReturn(null);
-    resourceAttributeEnricher.enrichEvent(null, event);
-  }
-
-  @Test
   public void noResourceInTrace() {
     // This trace has no resource attributes.
     StructuredTrace trace = getBigTrace();
