@@ -19,6 +19,7 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ResourceAttributeEnricher.class);
   private static final String RESOURCE_ATTRIBUTES_CONFIG_KEY = "attributes";
+  private static final String NODE_SELECTOR_KEY = "node.selector";
   private List<String> resourceAttributesToAdd = new ArrayList<>();
 
   public List<String> getResourceAttributesToAdd() {
@@ -52,7 +53,13 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
         Optional<AttributeValue> resourceAttribute =
             getResourceAttribute(trace, event, resourceAttributeKey);
         resourceAttribute.ifPresent(
-            attributeValue -> attributeMap.putIfAbsent(resourceAttributeKey, attributeValue));
+            attributeValue -> {
+              if (NODE_SELECTOR_KEY.equals(resourceAttributeKey)) {
+                attributeValue.setValue(attributeValue.getValue().substring(attributeValue.getValue().lastIndexOf("/")));
+              }
+              attributeMap.putIfAbsent(resourceAttributeKey, attributeValue);
+            }
+        );
       }
     } catch (Exception e) {
       LOGGER.error("Exception while enriching event with resource attributes.", e);
