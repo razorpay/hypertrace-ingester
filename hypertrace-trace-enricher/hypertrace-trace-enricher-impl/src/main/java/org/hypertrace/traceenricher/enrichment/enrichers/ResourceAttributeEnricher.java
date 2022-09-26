@@ -58,7 +58,7 @@ public class ResourceAttributeEnricher extends AbstractTraceEnricher {
                 attributeValue.setValue(
                     attributeValue
                         .getValue()
-                        .substring(attributeValue.getValue().lastIndexOf("/")));
+                        .substring(attributeValue.getValue().lastIndexOf('/') + 1));
               }
               attributeMap.putIfAbsent(resourceAttributeKey, attributeValue);
             });

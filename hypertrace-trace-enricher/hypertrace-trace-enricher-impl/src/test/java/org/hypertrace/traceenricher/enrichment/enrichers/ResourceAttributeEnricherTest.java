@@ -75,6 +75,8 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
 
     resourceList.add(getResource1());
     resourceList.add(getResource2());
+    resourceList.add(getResource3());
+    resourceList.add(getResource4());
     when(structuredTrace.getResourceList()).thenReturn(resourceList);
 
     Attributes attributes = Attributes.newBuilder().setAttributeMap(new HashMap<>()).build();
@@ -96,10 +98,13 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
         "01188498a468b5fef1eb4accd63533297c195a73",
         event.getAttributes().getAttributeMap().get("service.version").getValue());
     assertEquals("10.21.18.171", event.getAttributes().getAttributeMap().get("ip").getValue());
+    assertEquals(
+        "worker-hypertrace",
+        event.getAttributes().getAttributeMap().get("node.selector").getValue());
 
     Event event2 =
         Event.newBuilder()
-            .setAttributes(attributes)
+            .setAttributes(Attributes.newBuilder().setAttributeMap(new HashMap<>()).build())
             .setEventId(createByteBuffer("event2"))
             .setCustomerId(TENANT_ID)
             .build();
@@ -115,6 +120,57 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
         "default", event2.getAttributes().getAttributeMap().get("cluster.name").getValue());
     assertEquals(
         "worker-generic", event2.getAttributes().getAttributeMap().get("node.name").getValue());
+    assertEquals(
+        "worker-generic", event2.getAttributes().getAttributeMap().get("node.selector").getValue());
+
+    Event event3 =
+        Event.newBuilder()
+            .setAttributes(Attributes.newBuilder().setAttributeMap(new HashMap<>()).build())
+            .setEventId(createByteBuffer("event3"))
+            .setCustomerId(TENANT_ID)
+            .build();
+    event3.setResourceIndex(2);
+    resourceAttributeEnricher.enrichEvent(structuredTrace, event3);
+    assertEquals("", event3.getAttributes().getAttributeMap().get("node.selector").getValue());
+
+    Event event4 =
+        Event.newBuilder()
+            .setAttributes(Attributes.newBuilder().setAttributeMap(new HashMap<>()).build())
+            .setEventId(createByteBuffer("event4"))
+            .setCustomerId(TENANT_ID)
+            .build();
+    event3.setResourceIndex(3);
+    resourceAttributeEnricher.enrichEvent(structuredTrace, event4);
+    assertEquals(
+        "worker-generic", event4.getAttributes().getAttributeMap().get("node.selector").getValue());
+  }
+
+  private Resource getResource4() {
+    Map<String, AttributeValue> resourceAttributeMap =
+        new HashMap<>() {
+          {
+            put("node.selector", AttributeValue.newBuilder().setValue("worker-generic").build());
+          }
+        };
+    return Resource.newBuilder()
+        .setAttributes(Attributes.newBuilder().setAttributeMap(resourceAttributeMap).build())
+        .build();
+  }
+
+  private Resource getResource3() {
+    Map<String, AttributeValue> resourceAttributeMap =
+        new HashMap<>() {
+          {
+            put(
+                "node.selector",
+                AttributeValue.newBuilder()
+                    .setValue("node-role.kubernetes.io/worker-generic/")
+                    .build());
+          }
+        };
+    return Resource.newBuilder()
+        .setAttributes(Attributes.newBuilder().setAttributeMap(resourceAttributeMap).build())
+        .build();
   }
 
   private Resource getResource2() {
@@ -137,6 +193,11 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
             put(
                 "cluster.name",
                 AttributeValue.newBuilder().setValue("worker-generic-cluster").build());
+            put(
+                "node.selector",
+                AttributeValue.newBuilder()
+                    .setValue("node-role.kubernetes.io/worker-generic")
+                    .build());
           }
         };
     return Resource.newBuilder()
@@ -161,6 +222,11 @@ public class ResourceAttributeEnricherTest extends AbstractAttributeEnricherTest
             put("host.name", AttributeValue.newBuilder().setValue("test-56f5d554c-5swkj").build());
             put("ip", AttributeValue.newBuilder().setValue("10.21.18.171").build());
             put("client-uuid", AttributeValue.newBuilder().setValue("53a112a715bda986").build());
+            put(
+                "node.selector",
+                AttributeValue.newBuilder()
+                    .setValue("node-role.kubernetes.io/worker-hypertrace")
+                    .build());
           }
         };
     return Resource.newBuilder()
