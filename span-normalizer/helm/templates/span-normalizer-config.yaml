@@ -61,6 +61,22 @@ data:
       spanDropFilters = {{ .Values.spanNormalizerConfig.processor.spanDropFilters | toJson }}
       {{- end }}
 
+      {{- if hasKey .Values.spanNormalizerConfig.processor "bypassKey" }}
+      bypass.key = "{{ .Values.spanNormalizerConfig.processor.bypassKey }}"
+      {{- end }}
+
+      {{- if hasKey .Values.spanNormalizerConfig.processor "lateArrivalThresholdDuration" }}
+      late.arrival.threshold.duration = "{{ .Values.spanNormalizerConfig.processor.lateArrivalThresholdDuration }}"
+      {{- end }}
+
+      {{- if hasKey .Values.spanNormalizerConfig.processor "allowedAttributesPrefixes" }}
+      allowed.attributes.prefixes = {{ .Values.spanNormalizerConfig.processor.allowedAttributesPrefixes | toJson }}
+      {{- end }}
+
+      {{- if hasKey .Values.spanNormalizerConfig.processor "prefixedMatchedAllowedAttributes" }}
+      prefixed.matched.allowed.attributes = {{ .Values.spanNormalizerConfig.processor.prefixedMatchedAllowedAttributes | toJson }}
+      {{- end }}
+
       {{- if hasKey .Values.spanNormalizerConfig.processor "rootExitSpanDropCriterion" }}
       rootExitSpanDropCriterion = {{ .Values.spanNormalizerConfig.processor.rootExitSpanDropCriterion | toJson }}
       {{- end }}
@@ -77,4 +93,27 @@ data:
         names = {{- toJson .Values.spanNormalizerConfig.metrics.reporter.names | trim | nindent 12 }}
       }
     }
+    {{- end }}
+    clients {
+      config.service.config = {
+        host = {{ .Values.spanNormalizerConfig.configServiceHost }}
+        port = {{ .Values.spanNormalizerConfig.configServicePort }}
+      }
+    }
+    span.rules.exclude {
+      cache = {
+        refreshAfterWriteDuration = {{ .Values.spanNormalizerConfig.excludeSpanRulesConfig.cache.refreshAfterWriteDuration }}
+        expireAfterWriteDuration = {{ .Values.spanNormalizerConfig.excludeSpanRulesConfig.cache.expireAfterWriteDuration }}
+      }
+    }
+    {{- if hasKey .Values.spanNormalizerConfig "rateLimitConfig" }}
+    rate.limit.config = [
+      {{- range $k,$v := $.Values.spanNormalizerConfig.rateLimitConfig }}
+      {
+        tenantId = {{ $v.tenantId }}
+        groupingKey = {{ $v.groupingKey }}
+        maxSpansPerMinute = {{ $v.maxSpansPerMinute }}
+      },
+      {{- end }}
+    ]
     {{- end }}

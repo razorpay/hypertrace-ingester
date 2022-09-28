@@ -38,25 +38,21 @@ dependencies {
   implementation(project(":span-normalizer:span-normalizer-constants"))
   implementation(project(":semantic-convention-utils"))
 
-  implementation("org.hypertrace.core.datamodel:data-model:0.1.20")
+  implementation("org.hypertrace.core.datamodel:data-model:0.1.22")
   implementation("org.hypertrace.core.serviceframework:platform-service-framework:0.1.33")
   implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.33")
-  implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-framework:0.1.23")
+  implementation("org.hypertrace.core.kafkastreams.framework:kafka-streams-framework:0.1.25")
+  implementation("org.rocksdb:rocksdbjni:7.4.4")
+  implementation("org.hypertrace.config.service:span-processing-config-service-api:0.1.27")
+  implementation("org.hypertrace.config.service:config-utils:0.1.32")
+  implementation("org.hypertrace.core.grpcutils:grpc-client-utils:0.7.4")
+  implementation("org.hypertrace.core.grpcutils:grpc-context-utils:0.7.4")
+  implementation("com.google.guava:guava:31.1-jre")
 
   // Required for the GRPC clients.
-  runtimeOnly("io.grpc:grpc-netty:1.42.0")
-  constraints {
-    runtimeOnly("io.netty:netty-codec-http2:4.1.71.Final")
-    runtimeOnly("io.netty:netty-handler-proxy:4.1.71.Final")
-    implementation("org.glassfish.jersey.core:jersey-common:2.34") {
-      because("https://snyk.io/vuln/SNYK-JAVA-ORGGLASSFISHJERSEYCORE-1255637")
-    }
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1") {
-      because("Denial of Service (DoS) " +
-          "[Medium Severity][https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-2326698] " +
-          "in com.fasterxml.jackson.core:jackson-databind@2.12.2")
-    }
-  }
+  runtimeOnly("io.grpc:grpc-netty:1.45.1")
+  annotationProcessor("org.projectlombok:lombok:1.18.18")
+  compileOnly("org.projectlombok:lombok:1.18.18")
 
   implementation("com.typesafe:config:1.4.1")
   implementation("de.javakaffee:kryo-serializers:0.45")
