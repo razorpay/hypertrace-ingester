@@ -9,7 +9,7 @@ Hypertrace ingester is comprised of 4 streaming jobs on kafka
 ## Description
 | ![space-1.jpg](https://imagizer.imageshack.com/v2/xq90/923/UZhzhg.png) | 
 |:--:| 
-| *Hypertrace Ingester* |
+| *Hypertrace Ingester* sds |
 
 Working of Hypertrace starts with developers instrumenting their applications with tracing libraries (For ex., Zipkin, Jaeger). So the Hypertrace pipeline starts with Hypertrace OC Collector which is implementation based on OpenCensus Service. The Hypertrace OC Collector is a component that runs “nearby” (e.g. in the same VPC, AZ, etc.) a user’s application components and receives trace spans and metrics emitted by the tasks instrumented with Tracing libraries. 
 
