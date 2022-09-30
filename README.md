@@ -17,7 +17,7 @@ Hypertrace OC Collector writes spans from this processes/services to Kafka and t
 
 [raw-spans-grouper](https://github.com/hypertrace/raw-spans-grouper) fetches this `raw-spans` from kafka and creates structured traces out of it based on the trace id and the parent span id in the spans. So from this point onward we have traces and not spans!
 
-So suppose we have two spans with `traceID:1234` then we will group them into a single trace. 
+So suppose we have two spans with  sd `traceID:1234` then we will group them into a single trace. 
 
 Trace-enrichers are being used to enrich traces with entity information. [hypertrace-trace-enricher](https://github.com/hypertrace/hypertrace-trace-enricher) service talks to entity-service which fetches entity information from Mongo as required. For example, Let's say we got a span which has http method related attribute method: `/api/v1/user?name`. So, in this case, if we already have Endpoint entity which refers to `/api/v1/user`, we fetch the id of that entity and add it to span. Now, span will have one more attribute like this method:`/api/v1/user?name, api_id:1234`. 
 
