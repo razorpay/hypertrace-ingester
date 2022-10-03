@@ -28,6 +28,8 @@ import org.hypertrace.core.spannormalizer.jaeger.tenant.PIIMatchType;
 import org.hypertrace.core.spannormalizer.utils.TestUtils;
 import org.junit.jupiter.api.*;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JaegerSpanNormalizerTest {
@@ -364,7 +366,7 @@ public class JaegerSpanNormalizerTest {
   }
 
   @Test
-  public void testMetricMapForDuration() throws Exception {
+  public void testMetricMapForDuration() {
 
     String tenantId = "tenant-" + random.nextLong();
     com.google.protobuf.Duration duration = Duration.newBuilder().setNanos(4000).build();
@@ -372,10 +374,10 @@ public class JaegerSpanNormalizerTest {
             KeyValue.newBuilder()
                     .setKey(JaegerSpanNormalizer.OLD_JAEGER_SERVICENAME_KEY)
                     .setVStr("testService")).setDuration(duration).build();
-    Map<String, KeyValue> spanTags = null;
+    Map<String, KeyValue> spanTags = new HashMap<>();
 
     Event event = JaegerSpanNormalizer.buildEvent(tenantId, span, spanTags, Optional.empty());
-    assertTrue(event.getMetrics().getMetricMap().get("Duration-micro").getValue().equals(4.0));
+    assertEquals(4.0, event.getMetrics().getMetricMap().get("Duration-micro").getValue());
 
   }
 }
