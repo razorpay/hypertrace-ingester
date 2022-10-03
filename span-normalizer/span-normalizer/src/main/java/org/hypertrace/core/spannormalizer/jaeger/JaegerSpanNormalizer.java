@@ -4,6 +4,7 @@ import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuild
 import static org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry.registerCounter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.util.Timestamps;
 import com.typesafe.config.Config;
@@ -279,11 +280,12 @@ public class JaegerSpanNormalizer {
    * Builds the event object from the jaeger span. Note: tagsMap should contain keys that have
    * already been converted to lowercase by the caller.
    */
-  private Event buildEvent(
-      String tenantId,
-      Span jaegerSpan,
-      @Nonnull Map<String, KeyValue> tagsMap,
-      Optional<String> tenantIdKey) {
+  @VisibleForTesting
+  static Event buildEvent(
+          String tenantId,
+          Span jaegerSpan,
+          @Nonnull Map<String, KeyValue> tagsMap,
+          Optional<String> tenantIdKey) {
     Event.Builder eventBuilder = fastNewBuilder(Event.Builder.class);
     eventBuilder.setCustomerId(tenantId);
     eventBuilder.setEventId(jaegerSpan.getSpanId().asReadOnlyByteBuffer());
