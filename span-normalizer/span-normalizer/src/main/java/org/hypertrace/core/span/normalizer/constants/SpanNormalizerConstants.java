@@ -9,6 +9,6 @@ public class SpanNormalizerConstants {
   public static final String SPAN_REDACTION_CONFIG_KEY = "spanRedaction";
   public static final String PII_PCI_CONFIG_KEY = "spanRedaction.piiPciFields";
   public static final String REDACTED_FIELD_PREFIX = "redacted-";
-  public static final String REDACTED_PII_TAGS_KEY = "redactedPIITags";
-  public static final String REDACTED_PCI_TAGS_KEY = "redactedPCITags";
+  public static final String REDACTED_PII_TAGS_KEY = "redacted.pii.count";
+  public static final String REDACTED_PCI_TAGS_KEY = "redacted.pci.count";
 }
