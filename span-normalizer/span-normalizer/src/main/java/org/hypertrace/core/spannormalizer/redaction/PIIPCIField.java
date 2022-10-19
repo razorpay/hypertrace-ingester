@@ -6,10 +6,55 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.hypertrace.core.datamodel.AttributeValue;
 
 public class PIIPCIField {
+
+  public static class RegexInfo {
+    private String regexString;
+    private Pattern regexPattern;
+
+    public RegexInfo(String regexString) {
+      this.regexString = regexString;
+      this.regexPattern = Pattern.compile(regexString);
+    }
+
+    public String getRegexString() {
+      return regexString;
+    }
+
+    public Pattern getRegexPattern() {
+      return regexPattern;
+    }
+
+    @Override
+    public String toString() {
+      return "RegexInfo{"
+          + "regexString='"
+          + regexString
+          + '\''
+          + ", regexPattern="
+          + regexPattern
+          + '}';
+    }
+  }
+
+  public enum PIIPCIFieldType {
+    PII("PII"),
+    PCI("PCI");
+
+    private final String value;
+
+    PIIPCIFieldType(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+  }
 
   private String name;
   private Set<String> tagKeySet;

@@ -48,7 +48,6 @@ import org.hypertrace.core.span.constants.RawSpanConstants;
 import org.hypertrace.core.span.constants.v1.JaegerAttribute;
 import org.hypertrace.core.spannormalizer.constants.SpanNormalizerConstants;
 import org.hypertrace.core.spannormalizer.redaction.PIIPCIField;
-import org.hypertrace.core.spannormalizer.redaction.PIIPCIFieldType;
 import org.hypertrace.core.spannormalizer.util.JaegerHTTagsConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,7 +140,7 @@ public class JaegerSpanNormalizer {
           .ifPresent(rawSpanBuilder::setResource);
 
       if (!PIIPCIFields.isEmpty()) {
-        redactSpan(rawSpanBuilder);
+        redactSpanAttributes(rawSpanBuilder);
       }
 
       // build raw span
@@ -155,12 +154,12 @@ public class JaegerSpanNormalizer {
   }
 
   // redact PII tags, tag comparisons are case-insensitive (Resource tags are skipped)
-  private void redactSpan(Builder rawSpanBuilder) {
+  private void redactSpanAttributes(Builder rawSpanBuilder) {
     try {
       var attributeMap = rawSpanBuilder.getEvent().getAttributes().getAttributeMap();
 
-      Integer piiFieldsCount = 0;
-      Integer pciFieldsCount = 0;
+      int piiFieldsCount = 0;
+      int pciFieldsCount = 0;
 
       Set<String> tagKeys = attributeMap.keySet();
       for (PIIPCIField piiPciField : PIIPCIFields) {
@@ -168,14 +167,13 @@ public class JaegerSpanNormalizer {
         if (piiPciField.getRegexInfo().isPresent()) {
           matcher = piiPciField.getRegexInfo().get().getRegexPattern().matcher("");
         }
-        PIIPCIFieldType piiPciFieldType = piiPciField.getPiiPciFieldType();
+        PIIPCIField.PIIPCIFieldType piiPciFieldType = piiPciField.getPiiPciFieldType();
         for (String tagKey : tagKeys) {
           /* A Simple regex like PAN no. can have false positives.
              Hence, we only redact tag val when tagKey is present in possible list of regexTagKeySet.
-             If regexTagKeySet is empty, we redact the tag val always.
+             If regexTagKeySet is empty, we redact the tag val if it matches against regex pattern.
           */
-          if (!piiPciField.getTagKeySet().isEmpty()
-              && !piiPciField.getTagKeySet().contains(tagKey)) {
+          if (skipRedactionForTagKey(tagKey, piiPciField.getTagKeySet())) {
             continue;
           }
 
@@ -192,7 +190,7 @@ public class JaegerSpanNormalizer {
           }
 
           if (containsSensitiveData) {
-            if (piiPciFieldType == PIIPCIFieldType.PII) {
+            if (piiPciFieldType == PIIPCIField.PIIPCIFieldType.PII) {
               piiFieldsCount += 1;
             } else {
               pciFieldsCount += 1;
@@ -218,6 +216,10 @@ public class JaegerSpanNormalizer {
     } catch (Exception e) {
       LOG.error("An exception occurred while performing span redaction: ", e);
     }
+  }
+
+  private boolean skipRedactionForTagKey(String tagKey, Set<String> tagKeySet) {
+    return !tagKeySet.isEmpty() && !tagKeySet.contains(tagKey);
   }
 
   /**
