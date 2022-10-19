@@ -18,14 +18,27 @@ public class PIIPCIField {
   private PIIPCIFieldType piiPciFieldType;
 
   public PIIPCIField(String name, String regex, List<String> tagKeyList, String type) {
-    this.name = name;
-    this.tagKeySet = new HashSet<>(tagKeyList);
-    if (!StringUtils.isEmpty(regex)) {
-      this.regexInfo = new RegexInfo(regex);
+    if (isValidConfig(regex, tagKeyList, type)) {
+      this.name = name;
+      this.tagKeySet = new HashSet<>(tagKeyList);
+      if (!StringUtils.isEmpty(regex)) {
+        this.regexInfo = new RegexInfo(regex);
+      }
+      this.replacementValue =
+          AttributeValue.newBuilder().setValue(REDACTED_FIELD_PREFIX + name).build();
+      this.piiPciFieldType = PIIPCIFieldType.valueOf(type);
     }
-    this.replacementValue =
-        AttributeValue.newBuilder().setValue(REDACTED_FIELD_PREFIX + name).build();
-    this.piiPciFieldType = PIIPCIFieldType.valueOf(type);
+  }
+
+  private boolean isValidConfig(String regex, List<String> tagKeyList, String type) {
+    if (StringUtils.isEmpty(regex) && tagKeyList.isEmpty()) {
+      throw new RuntimeException("Both Regex and TagKeyList cannot be empty.");
+    }
+    if ((PIIPCIFieldType.valueOf(type) != PIIPCIFieldType.PCI)
+        && (PIIPCIFieldType.valueOf(type) != PIIPCIFieldType.PII)) {
+      throw new RuntimeException("Invalid PII/PCI field type provided.");
+    }
+    return true;
   }
 
   public Set<String> getTagKeySet() {
