@@ -1,8 +1,2 @@
-# https://help.github.com/articles/about-codeowners/
-# Each line is a file pattern followed by one or more owners.
-
-# global
-* @hypertrace/trace-pipeline-owners
-
 # GH action
-.github/ @aaron-steinfeld @jbahire @kotharironak @buchi-busireddy
+.github/ @Harnoor-se7en @Sunn-y-Arora @suddendust
