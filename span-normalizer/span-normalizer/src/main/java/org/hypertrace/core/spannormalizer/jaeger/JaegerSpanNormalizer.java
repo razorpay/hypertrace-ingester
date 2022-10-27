@@ -109,6 +109,10 @@ public class JaegerSpanNormalizer {
         jaegerSpan.getTagsList().stream()
             .collect(Collectors.toMap(t -> t.getKey().toLowerCase(), t -> t, (v1, v2) -> v2));
 
+    if (tags.containsKey("path") && tags.get("path").getVStr().equals("PairPublicKey")) {
+      LOG.info("bookmark: capitalRawSpan, span: {}", jaegerSpan);
+    }
+
     // Record the time taken for converting the span, along with the tenant id tag.
     return tenantToSpanNormalizationTimer
         .computeIfAbsent(
