@@ -87,11 +87,14 @@ public class EndpointEnricher extends AbstractTraceEnricher {
       apiEntity =
           getOperationNameBasedEndpointDiscoverer(customerId, serviceId, serviceName)
               .getApiEntity(event);
-      if(event.getAttributes().getAttributeMap().containsKey("path") &&
-              event.getAttributes().getAttributeMap().get("path").getValue().equals("PairPublicKey") ) {
-        LOGGER.info(
-                "bookmark: capitalSpan, event: {}",
-                event);
+      if (event.getAttributes().getAttributeMap().containsKey("path")
+          && event
+              .getAttributes()
+              .getAttributeMap()
+              .get("path")
+              .getValue()
+              .equals("PairPublicKey")) {
+        LOGGER.info("bookmark: capitalSpan, event: {}", event);
       }
     } catch (Exception e) {
       LOGGER.error(
