@@ -219,6 +219,7 @@ public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
     builder.setStartTimeMillis(event.getStartTimeMillis());
     builder.setEndTimeMillis(event.getEndTimeMillis());
     builder.setDurationMillis(event.getEndTimeMillis() - event.getStartTimeMillis());
+    builder.setDurationMicros(getDurationMetricValue(event));
 
     // error count
     MetricValue errorMetric = event.getMetrics().getMetricMap().get(ERROR_COUNT_CONSTANT);

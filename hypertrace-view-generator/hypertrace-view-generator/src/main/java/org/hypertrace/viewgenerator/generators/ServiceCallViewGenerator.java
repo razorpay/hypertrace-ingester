@@ -207,6 +207,7 @@ public class ServiceCallViewGenerator extends BaseViewGenerator<ServiceCallView>
     builder.setStartTimeMillis(event.getStartTimeMillis());
     builder.setEndTimeMillis(event.getEndTimeMillis());
     builder.setDurationMillis(event.getEndTimeMillis() - event.getStartTimeMillis());
+    builder.setDurationMicros(getDurationMetricValue(event));
   }
 
   private void buildExitSpanView(Event event, ServiceCallView.Builder builder) {

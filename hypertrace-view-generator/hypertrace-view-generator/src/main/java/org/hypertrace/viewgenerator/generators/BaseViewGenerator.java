@@ -20,12 +20,16 @@ import org.hypertrace.core.viewgenerator.JavaCodeBasedViewGenerator;
 import org.hypertrace.traceenricher.enrichedspan.constants.EnrichedSpanConstants;
 import org.hypertrace.traceenricher.enrichedspan.constants.v1.CommonAttribute;
 import org.hypertrace.viewgenerator.generators.ViewGeneratorState.TraceState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Pre-processing for View Generators, for data that are mostly needed by the the view generators
  */
 public abstract class BaseViewGenerator<OUT extends GenericRecord>
     implements JavaCodeBasedViewGenerator<StructuredTrace, OUT> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(BaseViewGenerator.class);
 
   private static final String VIEW_GENERATION_ARRIVAL_TIME = "view.generation.arrival.time";
   private static final Timer viewGeneratorArrivalTimer =
@@ -45,6 +49,17 @@ public abstract class BaseViewGenerator<OUT extends GenericRecord>
     return value.getValue();
   }
 
+  static double getDurationMetricValue(Event event) {
+    MetricValue value = event.getMetrics().getMetricMap().get("Duration-micro");
+    return value != null ? value.getValue() : 5.5d;
+  }
+
+  static double getDurationMetricValueTrace(StructuredTrace structuredTrace) {
+    MetricValue value =
+        structuredTrace.getEventList().get(0).getMetrics().getMetricMap().get("Duration-micro");
+    return value != null ? value.getValue() : 5.5d;
+  }
+
   @Nullable
   static String getTransactionName(StructuredTrace trace) {
     Attributes attributes = trace.getAttributes();
@@ -61,6 +76,7 @@ public abstract class BaseViewGenerator<OUT extends GenericRecord>
 
   @Override
   public List<OUT> process(StructuredTrace trace) {
+    LOG.info("Processing trace");
     DataflowMetricUtils.reportArrivalLagAndInsertTimestamp(
         trace, viewGeneratorArrivalTimer, VIEW_GENERATION_ARRIVAL_TIME);
     TraceState traceState = ViewGeneratorState.getTraceState(trace);
