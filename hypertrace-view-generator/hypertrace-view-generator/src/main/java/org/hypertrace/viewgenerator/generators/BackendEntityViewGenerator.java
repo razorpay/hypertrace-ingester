@@ -88,6 +88,7 @@ public class BackendEntityViewGenerator extends BaseViewGenerator<BackendEntityV
       builder.setStartTimeMillis(event.getStartTimeMillis());
       builder.setEndTimeMillis(event.getEndTimeMillis());
       builder.setDurationMillis(event.getEndTimeMillis() - event.getStartTimeMillis());
+      builder.setDurationMicros(getDurationMetricValue(event));
       Protocol protocol = EnrichedSpanUtils.getProtocol(event);
 
       double exceptionCount = getMetricValue(event, EXCEPTION_COUNT_ATTR, 0.0d);

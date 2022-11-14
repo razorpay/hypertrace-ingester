@@ -2,6 +2,7 @@ package org.hypertrace.core.spannormalizer.jaeger;
 
 import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.util.Timestamps;
 import com.typesafe.config.Config;
@@ -226,6 +227,7 @@ public class JaegerSpanNormalizer {
    * Builds the event object from the jaeger span. Note: tagsMap should contain keys that have
    * already been converted to lowercase by the caller.
    */
+  @VisibleForTesting
   private Event buildEvent(
       String tenantId,
       Span jaegerSpan,
@@ -314,9 +316,11 @@ public class JaegerSpanNormalizer {
     Map<String, MetricValue> metricMap = new HashMap<>();
     MetricValue durationMetric =
         fastNewBuilder(MetricValue.Builder.class)
-            .setValue((double) (endTimeMillis - startTimeMillis))
+            .setValue(
+                    jaegerSpan.getDuration().getSeconds()
+                            + (long) jaegerSpan.getDuration().getNanos() / 1000.0)
             .build();
-    metricMap.put("Duration", durationMetric);
+    metricMap.put("Duration-micro", durationMetric);
 
     eventBuilder.setMetrics(fastNewBuilder(Metrics.Builder.class).setMetricMap(metricMap).build());
 
