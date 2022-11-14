@@ -228,7 +228,7 @@ public class JaegerSpanNormalizer {
    * already been converted to lowercase by the caller.
    */
   @VisibleForTesting
-  private Event buildEvent(
+  public static Event buildEvent(
       String tenantId,
       Span jaegerSpan,
       @Nonnull Map<String, KeyValue> tagsMap,
@@ -317,8 +317,8 @@ public class JaegerSpanNormalizer {
     MetricValue durationMetric =
         fastNewBuilder(MetricValue.Builder.class)
             .setValue(
-                    jaegerSpan.getDuration().getSeconds()
-                            + (long) jaegerSpan.getDuration().getNanos() / 1000.0)
+                jaegerSpan.getDuration().getSeconds()
+                    + (long) jaegerSpan.getDuration().getNanos() / 1000.0)
             .build();
     metricMap.put("Duration-micro", durationMetric);
 

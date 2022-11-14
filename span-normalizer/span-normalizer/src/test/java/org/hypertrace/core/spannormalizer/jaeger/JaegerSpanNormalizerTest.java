@@ -1,6 +1,7 @@
 package org.hypertrace.core.spannormalizer.jaeger;
 
 import static org.hypertrace.core.span.constants.v1.Http.HTTP_REQUEST_METHOD;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.protobuf.Duration;
 import com.typesafe.config.Config;
@@ -13,14 +14,12 @@ import io.micrometer.core.instrument.Timer;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
-
 import org.hypertrace.core.datamodel.AttributeValue;
 import org.hypertrace.core.datamodel.Event;
 import org.hypertrace.core.datamodel.RawSpan;
 import org.hypertrace.core.serviceframework.config.ConfigClientFactory;
 import org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry;
 import org.hypertrace.core.span.constants.RawSpanConstants;
-import org.hypertrace.core.span.constants.v1.Error;
 import org.hypertrace.core.span.constants.v1.JaegerAttribute;
 import org.hypertrace.core.spannormalizer.SpanNormalizer;
 import org.hypertrace.core.spannormalizer.constants.SpanNormalizerConstants;
@@ -30,8 +29,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JaegerSpanNormalizerTest {
 
@@ -379,20 +376,22 @@ public class JaegerSpanNormalizerTest {
     Assertions.assertFalse(attributes.containsKey(SpanNormalizerConstants.REDACTED_PCI_TAGS_KEY));
   }
 
-
   @Test
   public void testMetricMapForDuration() {
 
     String tenantId = "tenant-" + random.nextLong();
     com.google.protobuf.Duration duration = Duration.newBuilder().setNanos(4000).build();
-    Span span = Span.newBuilder().addTags(
-            KeyValue.newBuilder()
+    Span span =
+        Span.newBuilder()
+            .addTags(
+                KeyValue.newBuilder()
                     .setKey(JaegerSpanNormalizer.OLD_JAEGER_SERVICENAME_KEY)
-                    .setVStr("testService")).setDuration(duration).build();
+                    .setVStr("testService"))
+            .setDuration(duration)
+            .build();
     Map<String, KeyValue> spanTags = new HashMap<>();
 
     Event event = JaegerSpanNormalizer.buildEvent(tenantId, span, spanTags, Optional.empty());
     assertEquals(4.0, event.getMetrics().getMetricMap().get("Duration-micro").getValue());
-
   }
 }
