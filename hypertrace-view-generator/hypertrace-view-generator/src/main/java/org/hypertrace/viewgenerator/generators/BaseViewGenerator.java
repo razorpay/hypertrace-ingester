@@ -92,8 +92,8 @@ public abstract class BaseViewGenerator<OUT extends GenericRecord>
     Map<ByteBuffer, ByteBuffer> childToParentEventIds =
         Collections.unmodifiableMap(traceState.getChildToParentEventIds());
 
-    List<OUT> view = generateView(
-        trace, entityMap, eventMap, parentToChildrenEventIds, childToParentEventIds);
+    List<OUT> view =
+        generateView(trace, entityMap, eventMap, parentToChildrenEventIds, childToParentEventIds);
 
     LOG.info("Successfully generated view");
 

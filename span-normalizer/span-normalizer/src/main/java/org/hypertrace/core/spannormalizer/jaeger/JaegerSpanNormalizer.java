@@ -228,7 +228,7 @@ public class JaegerSpanNormalizer {
    * already been converted to lowercase by the caller.
    */
   @VisibleForTesting
-   private Event buildEvent(
+  private Event buildEvent(
       String tenantId,
       Span jaegerSpan,
       @Nonnull Map<String, KeyValue> tagsMap,
