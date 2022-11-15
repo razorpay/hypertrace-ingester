@@ -2,7 +2,6 @@ package org.hypertrace.core.spannormalizer.jaeger;
 
 import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.util.Timestamps;
 import com.typesafe.config.Config;
