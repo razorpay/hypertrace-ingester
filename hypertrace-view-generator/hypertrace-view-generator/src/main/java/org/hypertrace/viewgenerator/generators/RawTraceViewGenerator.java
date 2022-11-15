@@ -20,8 +20,12 @@ import org.hypertrace.core.datamodel.StructuredTrace;
 import org.hypertrace.traceenricher.enrichedspan.constants.EnrichedSpanConstants;
 import org.hypertrace.traceenricher.enrichedspan.constants.utils.EnrichedSpanUtils;
 import org.hypertrace.viewgenerator.api.RawTraceView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RawTraceViewGenerator extends BaseViewGenerator<RawTraceView> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(RawTraceViewGenerator.class);
 
   @Override
   List<RawTraceView> generateView(
@@ -30,6 +34,7 @@ public class RawTraceViewGenerator extends BaseViewGenerator<RawTraceView> {
       Map<ByteBuffer, Event> eventMap,
       Map<ByteBuffer, List<ByteBuffer>> parentToChildrenEventIds,
       Map<ByteBuffer, ByteBuffer> childToParentEventIds) {
+    LOG.info("Generating RawTraceViewGenerator");
     RawTraceView.Builder builder = fastNewBuilder(RawTraceView.Builder.class);
     builder.setTenantId(structuredTrace.getCustomerId());
     builder.setTraceId(structuredTrace.getTraceId());

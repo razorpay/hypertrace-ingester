@@ -45,6 +45,7 @@ public class BackendEntityViewGenerator extends BaseViewGenerator<BackendEntityV
       Map<ByteBuffer, Event> eventMap,
       Map<ByteBuffer, List<ByteBuffer>> parentToChildrenEventIds,
       Map<ByteBuffer, ByteBuffer> childToParentEventIds) {
+    LOG.info("Generating BackendEntityView");
     return structuredTrace.getEventList().stream()
         .filter(event -> EnrichedSpanUtils.getBackendId(event) != null)
         .map(

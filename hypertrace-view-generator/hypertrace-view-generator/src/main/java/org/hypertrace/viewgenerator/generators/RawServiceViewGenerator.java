@@ -18,8 +18,12 @@ import org.hypertrace.traceenricher.enrichedspan.constants.v1.ErrorMetrics;
 import org.hypertrace.traceenricher.enrichedspan.constants.v1.Protocol;
 import org.hypertrace.traceenricher.trace.util.ApiTraceGraph;
 import org.hypertrace.viewgenerator.api.RawServiceView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RawServiceViewGenerator extends BaseViewGenerator<RawServiceView> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(RawServiceViewGenerator.class);
 
   @Override
   List<RawServiceView> generateView(
@@ -28,6 +32,7 @@ public class RawServiceViewGenerator extends BaseViewGenerator<RawServiceView> {
       Map<ByteBuffer, Event> eventMap,
       Map<ByteBuffer, List<ByteBuffer>> parentToChildrenEventIds,
       Map<ByteBuffer, ByteBuffer> childToParentEventIds) {
+    LOG.info("Generating RawServiceView");
     List<RawServiceView> list = new ArrayList<>();
 
     // Construct ApiTraceGraph and look at all the head spans within each ApiNode

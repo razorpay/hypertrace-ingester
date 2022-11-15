@@ -61,6 +61,7 @@ public class ServiceCallViewGenerator extends BaseViewGenerator<ServiceCallView>
       Map<ByteBuffer, Event> eventMap,
       Map<ByteBuffer, List<ByteBuffer>> parentToChildrenEventIds,
       Map<ByteBuffer, ByteBuffer> childToParentEventId) {
+    LOG.info("Generating ServiceCallViewGenerator");
     ApiTraceGraph apiTraceGraph = ViewGeneratorState.getApiTraceGraph(structuredTrace);
     List<ServiceCallView> serviceCallViewRecords = new ArrayList<>();
 

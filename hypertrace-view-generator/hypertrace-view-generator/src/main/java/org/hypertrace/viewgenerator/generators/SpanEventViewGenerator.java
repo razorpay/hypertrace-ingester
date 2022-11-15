@@ -23,8 +23,12 @@ import org.hypertrace.traceenricher.enrichedspan.constants.v1.CommonAttribute;
 import org.hypertrace.traceenricher.enrichedspan.constants.v1.ErrorMetrics;
 import org.hypertrace.traceenricher.enrichedspan.constants.v1.Protocol;
 import org.hypertrace.viewgenerator.api.SpanEventView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(SpanEventViewGenerator.class);
 
   private static final String ERROR_COUNT_CONSTANT =
       EnrichedSpanConstants.getValue(ErrorMetrics.ERROR_METRICS_ERROR_COUNT);
@@ -54,6 +58,7 @@ public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
       Map<ByteBuffer, Event> eventMap,
       Map<ByteBuffer, List<ByteBuffer>> parentToChildrenEventIds,
       Map<ByteBuffer, ByteBuffer> childToParentEventIds) {
+    LOG.info("Generating SpanEventView");
     Map<ByteBuffer, Event> exitSpanToCalleeApiEntrySpanMap =
         getExitSpanToCalleeApiEntrySpanMap(
             structuredTrace.getEventList(),
