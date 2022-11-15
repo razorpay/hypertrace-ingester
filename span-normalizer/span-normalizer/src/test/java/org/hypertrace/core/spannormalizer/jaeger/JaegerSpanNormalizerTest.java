@@ -376,22 +376,22 @@ public class JaegerSpanNormalizerTest {
     Assertions.assertFalse(attributes.containsKey(SpanNormalizerConstants.REDACTED_PCI_TAGS_KEY));
   }
 
-  @Test
-  public void testMetricMapForDuration() {
-
-    String tenantId = "tenant-" + random.nextLong();
-    com.google.protobuf.Duration duration = Duration.newBuilder().setNanos(4000).build();
-    Span span =
-        Span.newBuilder()
-            .addTags(
-                KeyValue.newBuilder()
-                    .setKey(JaegerSpanNormalizer.OLD_JAEGER_SERVICENAME_KEY)
-                    .setVStr("testService"))
-            .setDuration(duration)
-            .build();
-    Map<String, KeyValue> spanTags = new HashMap<>();
-
-    Event event = JaegerSpanNormalizer.buildEvent(tenantId, span, spanTags, Optional.empty());
-    assertEquals(4.0, event.getMetrics().getMetricMap().get("Duration-micro").getValue());
-  }
+//  @Test
+//  public void testMetricMapForDuration() {
+//
+//    String tenantId = "tenant-" + random.nextLong();
+//    com.google.protobuf.Duration duration = Duration.newBuilder().setNanos(4000).build();
+//    Span span =
+//        Span.newBuilder()
+//            .addTags(
+//                KeyValue.newBuilder()
+//                    .setKey(JaegerSpanNormalizer.OLD_JAEGER_SERVICENAME_KEY)
+//                    .setVStr("testService"))
+//            .setDuration(duration)
+//            .build();
+//    Map<String, KeyValue> spanTags = new HashMap<>();
+//
+//    Event event = JaegerSpanNormalizer.buildEvent(tenantId, span, spanTags, Optional.empty());
+//    assertEquals(4.0, event.getMetrics().getMetricMap().get("Duration-micro").getValue());
+//  }
 }
