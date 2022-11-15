@@ -219,7 +219,7 @@ public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
     builder.setStartTimeMillis(event.getStartTimeMillis());
     builder.setEndTimeMillis(event.getEndTimeMillis());
     builder.setDurationMillis(event.getEndTimeMillis() - event.getStartTimeMillis());
-    builder.setDurationMicros(getDurationMetricValue(event));
+    builder.setDurationMicros(getDurationMetricValue(event, 0.0d));
 
     // internal duration
     double internal_duration =
