@@ -317,7 +317,7 @@ public class JaegerSpanNormalizerTest {
             .addTags(0, KeyValue.newBuilder().setKey("http1").setVStr("GET").build())
             .build();
 
-    rawSpan = normalizer.convert(tenantId, span);
+    rawSpan = normalizer.convert(tenantId, span, buildEvent(tenantId, span, Optional.empty()));
     attributes = rawSpan.getEvent().getAttributes().getAttributeMap();
     Assertions.assertEquals("GET", attributes.get("http1").getValue());
     Assertions.assertFalse(attributes.containsKey(SpanNormalizerConstants.REDACTED_PCI_TAGS_KEY));
