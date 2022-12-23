@@ -21,3 +21,11 @@ Cut from commit: [13c9380](https://github.com/razorpay/hypertrace-ingester/commi
 ###Changelog
 
 - Enhancement: Redaction of sensitive spans, for full details pls read PR description [pull/58](https://github.com/razorpay/hypertrace-ingester/pull/86).
+
+## Hypertrace-Ingester 1.7.0
+
+Cut from commit: [3f21d29](https://github.com/razorpay/hypertrace-ingester/commit/3f21d29fedef02cbd3968490b184adc35f5975a7)
+
+###Changelog
+
+- Enhancement: Add deployment type in resource attribute enricher, for full details pls read PR description [pull/118](https://github.com/razorpay/hypertrace-ingester/pull/118).
