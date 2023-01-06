@@ -48,7 +48,7 @@ protocol SpanEventViewProtocol {
     long duration_millis = 0;
 
     //todo: this should be null by default. This schema change is incompatible
-    long internal_duration_millis = 0;
+    long internal_duration_millis = -1;
 
     // span id of an entry api span.
     union { null, bytes } api_trace_id = null;
