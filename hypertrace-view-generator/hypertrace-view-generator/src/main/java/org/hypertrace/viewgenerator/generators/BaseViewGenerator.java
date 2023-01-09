@@ -81,7 +81,6 @@ public abstract class BaseViewGenerator<OUT extends GenericRecord>
 
   @Override
   public List<OUT> process(StructuredTrace trace) {
-    LOG.info("Generating view..");
     DataflowMetricUtils.reportArrivalLagAndInsertTimestamp(
         trace, viewGeneratorArrivalTimer, VIEW_GENERATION_ARRIVAL_TIME);
     TraceState traceState = ViewGeneratorState.getTraceState(trace);
@@ -92,12 +91,9 @@ public abstract class BaseViewGenerator<OUT extends GenericRecord>
     Map<ByteBuffer, ByteBuffer> childToParentEventIds =
         Collections.unmodifiableMap(traceState.getChildToParentEventIds());
 
-    List<OUT> view =
-        generateView(trace, entityMap, eventMap, parentToChildrenEventIds, childToParentEventIds);
+    return generateView(
+            trace, entityMap, eventMap, parentToChildrenEventIds, childToParentEventIds);
 
-    LOG.info("Successfully generated view");
-
-    return view;
   }
 
   abstract List<OUT> generateView(

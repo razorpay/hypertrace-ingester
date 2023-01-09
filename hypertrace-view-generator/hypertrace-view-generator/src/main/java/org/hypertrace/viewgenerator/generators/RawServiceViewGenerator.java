@@ -23,8 +23,6 @@ import org.slf4j.LoggerFactory;
 
 public class RawServiceViewGenerator extends BaseViewGenerator<RawServiceView> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(RawServiceViewGenerator.class);
-
   @Override
   List<RawServiceView> generateView(
       StructuredTrace structuredTrace,
@@ -32,7 +30,6 @@ public class RawServiceViewGenerator extends BaseViewGenerator<RawServiceView> {
       Map<ByteBuffer, Event> eventMap,
       Map<ByteBuffer, List<ByteBuffer>> parentToChildrenEventIds,
       Map<ByteBuffer, ByteBuffer> childToParentEventIds) {
-    LOG.info("Generating RawServiceView");
     List<RawServiceView> list = new ArrayList<>();
 
     // Construct ApiTraceGraph and look at all the head spans within each ApiNode
@@ -55,7 +52,6 @@ public class RawServiceViewGenerator extends BaseViewGenerator<RawServiceView> {
         builder.setStartTimeMillis(event.getStartTimeMillis());
         builder.setEndTimeMillis(event.getEndTimeMillis());
         builder.setDurationMillis(event.getEndTimeMillis() - event.getStartTimeMillis());
-        builder.setDurationMicros(getDurationMetricValue(event, 0.0d));
         builder.setTransactionName(getTransactionName(structuredTrace));
 
         String spanType = EnrichedSpanUtils.getSpanType(event);

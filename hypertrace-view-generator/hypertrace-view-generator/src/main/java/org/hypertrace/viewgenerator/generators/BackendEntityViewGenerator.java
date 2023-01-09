@@ -45,7 +45,6 @@ public class BackendEntityViewGenerator extends BaseViewGenerator<BackendEntityV
       Map<ByteBuffer, Event> eventMap,
       Map<ByteBuffer, List<ByteBuffer>> parentToChildrenEventIds,
       Map<ByteBuffer, ByteBuffer> childToParentEventIds) {
-    LOG.info("Generating BackendEntityView");
     return structuredTrace.getEventList().stream()
         .filter(event -> EnrichedSpanUtils.getBackendId(event) != null)
         .map(
@@ -89,7 +88,6 @@ public class BackendEntityViewGenerator extends BaseViewGenerator<BackendEntityV
       builder.setStartTimeMillis(event.getStartTimeMillis());
       builder.setEndTimeMillis(event.getEndTimeMillis());
       builder.setDurationMillis(event.getEndTimeMillis() - event.getStartTimeMillis());
-      builder.setDurationMicros(getDurationMetricValue(event, 0.0d));
       Protocol protocol = EnrichedSpanUtils.getProtocol(event);
 
       double exceptionCount = getMetricValue(event, EXCEPTION_COUNT_ATTR, 0.0d);
