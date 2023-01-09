@@ -24,9 +24,6 @@ protocol BackendEntityViewProtocol {
 
     long duration_millis = 0;
 
-    // duration micro
-    double duration_micros = 0;
-
     union { null, string } span_kind = null;
 
     int error_count = 0;

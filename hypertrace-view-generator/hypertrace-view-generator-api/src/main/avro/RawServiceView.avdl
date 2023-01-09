@@ -20,9 +20,6 @@ protocol RawServiceViewProtocol {
 
     union { null, long } internal_duration_millis = null;
 
-    // duration micro
-    double duration_micros = 0;
-
     union { null, string } span_kind = null;
 
     int error_count = 0;
