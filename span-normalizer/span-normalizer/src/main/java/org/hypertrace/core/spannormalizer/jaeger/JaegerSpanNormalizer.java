@@ -314,11 +314,9 @@ public class JaegerSpanNormalizer {
     Map<String, MetricValue> metricMap = new HashMap<>();
     MetricValue durationMetric =
         fastNewBuilder(MetricValue.Builder.class)
-            .setValue(
-                jaegerSpan.getDuration().getSeconds()
-                    + (long) jaegerSpan.getDuration().getNanos() / 1000.0)
+            .setValue((double) (endTimeMillis - startTimeMillis))
             .build();
-    metricMap.put("Duration-micro", durationMetric);
+    metricMap.put("Duration", durationMetric);
 
     eventBuilder.setMetrics(fastNewBuilder(Metrics.Builder.class).setMetricMap(metricMap).build());
 
