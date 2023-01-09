@@ -18,8 +18,6 @@ import org.hypertrace.traceenricher.enrichedspan.constants.v1.ErrorMetrics;
 import org.hypertrace.traceenricher.enrichedspan.constants.v1.Protocol;
 import org.hypertrace.traceenricher.trace.util.ApiTraceGraph;
 import org.hypertrace.viewgenerator.api.RawServiceView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RawServiceViewGenerator extends BaseViewGenerator<RawServiceView> {
 
