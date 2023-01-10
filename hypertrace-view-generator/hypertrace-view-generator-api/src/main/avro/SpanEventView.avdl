@@ -50,8 +50,8 @@ protocol SpanEventViewProtocol {
     //this will be >=0 only for spans with API_BOUNDARY_TYPE = ENTRY
     union { null, long } internal_duration_millis = null;
 
-    // duration micro
-    double duration_high_resolution = 0;
+    // duration millis upto 2 decimal places
+    double duration_millis_double = 0;
 
     // span id of an entry api span.
     union { null, bytes } api_trace_id = null;

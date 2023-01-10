@@ -1,10 +1,8 @@
 package org.hypertrace.viewgenerator.generators;
 
-import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
 import static org.hypertrace.core.span.constants.v1.Http.HTTP_PATH;
 import static org.hypertrace.core.span.constants.v1.Http.HTTP_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -164,9 +162,6 @@ public class SpanEventViewGeneratorTest {
 
   @Test
   public void testExitCallsInfo() {
-    MetricValue metricValue = fastNewBuilder(MetricValue.Builder.class).setValue(645.0).build();
-    Map<String, MetricValue> metricMap = new HashMap<>();
-    metricMap.put("Duration-micro", metricValue);
     StructuredTrace.Builder traceBuilder = StructuredTrace.newBuilder();
     traceBuilder
         .setCustomerId("customer1")
@@ -188,12 +183,12 @@ public class SpanEventViewGeneratorTest {
                     .setEntityIdList(Collections.singletonList("sample-entity-id"))
                     .setStartTimeMillis(System.currentTimeMillis())
                     .setEndTimeMillis(System.currentTimeMillis())
-                    .setMetrics(Metrics.newBuilder().setMetricMap(metricMap).build())
+                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
                     .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
                     .setEnrichedAttributesBuilder(
                         Attributes.newBuilder().setAttributeMap(Maps.newHashMap()))
                     .build()))
-        .setMetrics(Metrics.newBuilder().setMetricMap(metricMap).build())
+        .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
         .setEntityEdgeList(new ArrayList<>())
         .setEventEdgeList(new ArrayList<>())
         .setEntityEventEdgeList(new ArrayList<>())
@@ -205,7 +200,7 @@ public class SpanEventViewGeneratorTest {
     List<SpanEventView> list = spanEventViewGenerator.process(trace);
     assertEquals(Maps.newHashMap(), list.get(0).getApiCalleeNameCount());
     assertEquals(0, list.get(0).getApiExitCalls());
-    assertTrue(trace.getMetrics().getMetricMap().get("Duration-micro").getValue().equals(645.0));
+    assertEquals(645.0, trace.getMetrics().getMetricMap().get("DurationPrecise").getValue());
 
     Map<String, AttributeValue> spanAttributes = new HashMap<>();
     spanAttributes.put(
@@ -230,7 +225,7 @@ public class SpanEventViewGeneratorTest {
                     .setEntityIdList(Collections.singletonList("sample-entity-id"))
                     .setStartTimeMillis(System.currentTimeMillis())
                     .setEndTimeMillis(System.currentTimeMillis())
-                    .setMetrics(Metrics.newBuilder().setMetricMap(metricMap).build())
+                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
                     .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
                     .setEnrichedAttributesBuilder(
                         Attributes.newBuilder().setAttributeMap(spanAttributes))
@@ -242,14 +237,11 @@ public class SpanEventViewGeneratorTest {
     list = spanEventViewGenerator.process(trace);
     assertEquals(calleeNameCount, list.get(0).getApiCalleeNameCount());
     assertEquals(5, list.get(0).getApiExitCalls());
-    assertTrue(trace.getMetrics().getMetricMap().get("Duration-micro").getValue().equals(645.0));
+    assertEquals(645.0, trace.getMetrics().getMetricMap().get("DurationPrecise").getValue());
   }
 
   @Test
   public void testApiTraceErrorSpanCount() {
-    MetricValue metricValue = fastNewBuilder(MetricValue.Builder.class).setValue(645.0).build();
-    Map<String, MetricValue> metricMap = new HashMap<>();
-    metricMap.put("Duration-micro", metricValue);
     StructuredTrace.Builder traceBuilder = StructuredTrace.newBuilder();
     traceBuilder
         .setCustomerId("customer1")
@@ -271,12 +263,12 @@ public class SpanEventViewGeneratorTest {
                     .setEntityIdList(Collections.singletonList("sample-entity-id"))
                     .setStartTimeMillis(System.currentTimeMillis())
                     .setEndTimeMillis(System.currentTimeMillis())
-                    .setMetrics(Metrics.newBuilder().setMetricMap(metricMap).build())
+                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
                     .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
                     .setEnrichedAttributesBuilder(
                         Attributes.newBuilder().setAttributeMap(Maps.newHashMap()))
                     .build()))
-        .setMetrics(Metrics.newBuilder().setMetricMap(metricMap).build())
+        .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
         .setEntityEdgeList(new ArrayList<>())
         .setEventEdgeList(new ArrayList<>())
         .setEntityEventEdgeList(new ArrayList<>())
@@ -303,7 +295,7 @@ public class SpanEventViewGeneratorTest {
                     .setEntityIdList(Collections.singletonList("sample-entity-id"))
                     .setStartTimeMillis(System.currentTimeMillis())
                     .setEndTimeMillis(System.currentTimeMillis())
-                    .setMetrics(Metrics.newBuilder().setMetricMap(metricMap).build())
+                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
                     .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
                     .setEnrichedAttributesBuilder(
                         Attributes.newBuilder().setAttributeMap(spanAttributes))
@@ -314,7 +306,6 @@ public class SpanEventViewGeneratorTest {
     spanEventViewGenerator = new SpanEventViewGenerator();
     list = spanEventViewGenerator.process(trace);
     assertEquals(5, list.get(0).getApiTraceErrorSpanCount());
-    assertTrue(trace.getMetrics().getMetricMap().get("Duration-micro").getValue().equals(645.0));
   }
 
   @Test

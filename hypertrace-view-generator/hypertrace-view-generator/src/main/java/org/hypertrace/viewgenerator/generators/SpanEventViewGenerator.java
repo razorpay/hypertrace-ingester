@@ -235,7 +235,7 @@ public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
 
     // duration_high_resolution (high resolution duration)
     double preciseDuration = getMetricValue(event, DURATION_PRECISE_CONSTANT, -1);
-    builder.setDurationHighResolution(Double.parseDouble(df.format(preciseDuration)));
+    builder.setDurationMillisDouble(Double.parseDouble(df.format(preciseDuration)));
 
     // error count
     MetricValue errorMetric = event.getMetrics().getMetricMap().get(ERROR_COUNT_CONSTANT);
