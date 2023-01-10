@@ -233,10 +233,9 @@ public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
       builder.setInternalDurationMillis((long) internal_duration);
     }
 
-    //duration_double (high resolution duration)
-    double preciseDuration =
-            getMetricValue(event, "durationPrecise", -1);
-    builder.setInternalDurationMillis((long) internal_duration);
+    // duration_double (high resolution duration)
+    double preciseDuration = getMetricValue(event, "durationPrecise", -1);
+    //    builder.setD((long) internal_duration);
 
     // error count
     MetricValue errorMetric = event.getMetrics().getMetricMap().get(ERROR_COUNT_CONSTANT);

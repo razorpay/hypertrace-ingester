@@ -72,8 +72,7 @@ public abstract class BaseViewGenerator<OUT extends GenericRecord>
         Collections.unmodifiableMap(traceState.getChildToParentEventIds());
 
     return generateView(
-            trace, entityMap, eventMap, parentToChildrenEventIds, childToParentEventIds);
-
+        trace, entityMap, eventMap, parentToChildrenEventIds, childToParentEventIds);
   }
 
   abstract List<OUT> generateView(
