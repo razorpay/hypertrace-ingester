@@ -2,9 +2,9 @@ package org.hypertrace.viewgenerator.generators;
 
 import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
 import static org.hypertrace.core.datamodel.shared.SpanAttributeUtils.getStringAttribute;
+import static util.MathUtil.*;
 
 import java.nio.ByteBuffer;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +33,7 @@ public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
   private static final String EXCEPTION_COUNT_CONSTANT =
       EnrichedSpanConstants.getValue(ErrorMetrics.ERROR_METRICS_EXCEPTION_COUNT);
 
-  private static final String DURATION_PRECISE_CONSTANT = "DurationPrecise";
-
-  private static final DecimalFormat df = new DecimalFormat("#.##");
+  private static final String DURATION_MICROS_CONSTANT = "DurationMicros";
 
   @Override
   public String getViewName() {
@@ -233,9 +231,10 @@ public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
       builder.setInternalDurationMillis((long) internal_duration);
     }
 
-    // duration_high_resolution (high resolution duration)
-    double preciseDuration = getMetricValue(event, DURATION_PRECISE_CONSTANT, -1);
-    builder.setDurationMillisDouble(Double.parseDouble(df.format(preciseDuration)));
+    // duration_millis_double (high resolution duration)
+    double durationMillisDouble =
+        convertMicrosToMillis(getMetricValue(event, DURATION_MICROS_CONSTANT, -1));
+    builder.setDurationMillisDouble(roundToTwoDecimalPlaces(durationMillisDouble));
 
     // error count
     MetricValue errorMetric = event.getMetrics().getMetricMap().get(ERROR_COUNT_CONSTANT);

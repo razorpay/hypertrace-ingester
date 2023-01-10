@@ -386,13 +386,13 @@ public class JaegerSpanNormalizerTest {
     com.google.protobuf.Duration duration = Duration.newBuilder().setNanos(4000).build();
     Span span = Span.newBuilder().setProcess(process).setDuration(duration).build();
     RawSpan rawSpan = normalizer.convert(tenantId, span);
-    MetricValue metricValue = rawSpan.getEvent().getMetrics().getMetricMap().get("DurationPrecise");
-    Assertions.assertEquals(4000.0, metricValue.getValue());
+    MetricValue metricValue = rawSpan.getEvent().getMetrics().getMetricMap().get("DurationMicros");
+    Assertions.assertEquals(4.0, metricValue.getValue());
 
     duration = Duration.newBuilder().setSeconds(253402300799L).setNanos(999999999).build();
     span = Span.newBuilder().setProcess(process).setDuration(duration).build();
     rawSpan = normalizer.convert(tenantId, span);
-    metricValue = rawSpan.getEvent().getMetrics().getMetricMap().get("DurationPrecise");
-    Assertions.assertEquals((999999999.0 + 253402300799.0), metricValue.getValue());
+    metricValue = rawSpan.getEvent().getMetrics().getMetricMap().get("DurationMicros");
+    Assertions.assertEquals(2.534023008E17, metricValue.getValue());
   }
 }
