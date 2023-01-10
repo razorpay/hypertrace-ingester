@@ -3,7 +3,6 @@ package org.hypertrace.viewgenerator.generators;
 import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
 import static org.hypertrace.core.datamodel.shared.SpanAttributeUtils.getStringAttribute;
 
-import java.math.RoundingMode;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -34,8 +33,7 @@ public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
   private static final String EXCEPTION_COUNT_CONSTANT =
       EnrichedSpanConstants.getValue(ErrorMetrics.ERROR_METRICS_EXCEPTION_COUNT);
 
-  private static final String DURATION_PRECISE_CONSTANT =
-          "durationPrecise";
+  private static final String DURATION_PRECISE_CONSTANT = "durationPrecise";
 
   private static final DecimalFormat df = new DecimalFormat("#.##");
 
