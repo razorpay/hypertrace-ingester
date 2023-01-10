@@ -33,7 +33,7 @@ public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
   private static final String EXCEPTION_COUNT_CONSTANT =
       EnrichedSpanConstants.getValue(ErrorMetrics.ERROR_METRICS_EXCEPTION_COUNT);
 
-  private static final String DURATION_PRECISE_CONSTANT = "durationPrecise";
+  private static final String DURATION_PRECISE_CONSTANT = "DurationPrecise";
 
   private static final DecimalFormat df = new DecimalFormat("#.##");
 
