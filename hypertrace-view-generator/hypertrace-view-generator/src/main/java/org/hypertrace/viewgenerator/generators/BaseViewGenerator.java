@@ -26,6 +26,7 @@ import org.hypertrace.viewgenerator.generators.ViewGeneratorState.TraceState;
  */
 public abstract class BaseViewGenerator<OUT extends GenericRecord>
     implements JavaCodeBasedViewGenerator<StructuredTrace, OUT> {
+
   private static final String VIEW_GENERATION_ARRIVAL_TIME = "view.generation.arrival.time";
   private static final Timer viewGeneratorArrivalTimer =
       PlatformMetricsRegistry.registerTimer(DataflowMetricUtils.ARRIVAL_LAG, new HashMap<>());
