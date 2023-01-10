@@ -224,7 +224,6 @@ public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
     builder.setStartTimeMillis(event.getStartTimeMillis());
     builder.setEndTimeMillis(event.getEndTimeMillis());
     builder.setDurationMillis(event.getEndTimeMillis() - event.getStartTimeMillis());
-    builder.setDurationMicros(getDurationMetricValue(event, 0.0d));
 
     // internal duration
     double internal_duration =
@@ -233,6 +232,11 @@ public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
     if (internal_duration != -1) {
       builder.setInternalDurationMillis((long) internal_duration);
     }
+
+    //duration_double (high resolution duration)
+    double preciseDuration =
+            getMetricValue(event, "durationPrecise", -1);
+    builder.setInternalDurationMillis((long) internal_duration);
 
     // error count
     MetricValue errorMetric = event.getMetrics().getMetricMap().get(ERROR_COUNT_CONSTANT);

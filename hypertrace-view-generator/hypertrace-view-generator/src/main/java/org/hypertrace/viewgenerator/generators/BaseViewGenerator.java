@@ -48,23 +48,6 @@ public abstract class BaseViewGenerator<OUT extends GenericRecord>
     return value.getValue();
   }
 
-  static double getDurationMetricValue(Event event, double defaultValue) {
-    MetricValue value = event.getMetrics().getMetricMap().get("Duration-micro");
-    if (value == null) {
-      return defaultValue;
-    }
-    return value.getValue();
-  }
-
-  static double getDurationMetricValueTrace(StructuredTrace structuredTrace, double defaultValue) {
-    MetricValue value =
-        structuredTrace.getEventList().get(0).getMetrics().getMetricMap().get("Duration-micro");
-    if (value == null) {
-      return defaultValue;
-    }
-    return value.getValue();
-  }
-
   @Nullable
   static String getTransactionName(StructuredTrace trace) {
     Attributes attributes = trace.getAttributes();
