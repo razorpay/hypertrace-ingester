@@ -318,13 +318,13 @@ public class JaegerSpanNormalizer {
             .build();
     metricMap.put("Duration", durationMetric);
 
-    MetricValue durationPrecise =
+    MetricValue durationPreciseMetric =
         fastNewBuilder(MetricValue.Builder.class)
             .setValue(
-                (double)
-                    (jaegerSpan.getDuration().getSeconds() + jaegerSpan.getDuration().getNanos()))
+                ((double) jaegerSpan.getDuration().getSeconds())
+                    + jaegerSpan.getDuration().getNanos())
             .build();
-    metricMap.put("DurationPrecise", durationMetric);
+    metricMap.put("DurationPrecise", durationPreciseMetric);
 
     eventBuilder.setMetrics(fastNewBuilder(Metrics.Builder.class).setMetricMap(metricMap).build());
 

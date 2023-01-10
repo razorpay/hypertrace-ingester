@@ -2,6 +2,7 @@ package org.hypertrace.core.spannormalizer.jaeger;
 
 import static org.hypertrace.core.span.constants.v1.Http.HTTP_REQUEST_METHOD;
 
+import com.google.protobuf.Duration;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.jaegertracing.api_v2.JaegerSpanInternalModel;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import org.hypertrace.core.datamodel.AttributeValue;
+import org.hypertrace.core.datamodel.MetricValue;
 import org.hypertrace.core.datamodel.RawSpan;
 import org.hypertrace.core.serviceframework.config.ConfigClientFactory;
 import org.hypertrace.core.serviceframework.metrics.PlatformMetricsRegistry;
@@ -373,22 +375,24 @@ public class JaegerSpanNormalizerTest {
     Assertions.assertFalse(attributes.containsKey(SpanNormalizerConstants.REDACTED_PCI_TAGS_KEY));
   }
 
-  //  @Test
-  //  public void testMetricMapForDuration() {
-  //
-  //    String tenantId = "tenant-" + random.nextLong();
-  //    com.google.protobuf.Duration duration = Duration.newBuilder().setNanos(4000).build();
-  //    Span span =
-  //        Span.newBuilder()
-  //            .addTags(
-  //                KeyValue.newBuilder()
-  //                    .setKey(JaegerSpanNormalizer.OLD_JAEGER_SERVICENAME_KEY)
-  //                    .setVStr("testService"))
-  //            .setDuration(duration)
-  //            .build();
-  //    Map<String, KeyValue> spanTags = new HashMap<>();
-  //
-  //    Event event = JaegerSpanNormalizer.buildEvent(tenantId, span, spanTags, Optional.empty());
-  //    assertEquals(4.0, event.getMetrics().getMetricMap().get("Duration-micro").getValue());
-  //  }
+  @Test
+  public void testMetricMapForDuration() throws Exception {
+    String tenantId = "tenant-" + random.nextLong();
+    Map<String, Object> configs = new HashMap<>(getCommonConfig());
+    configs.putAll(Map.of("processor", Map.of("defaultTenantId", tenantId)));
+    JaegerSpanNormalizer normalizer = JaegerSpanNormalizer.get(ConfigFactory.parseMap(configs));
+    Process process = Process.newBuilder().setServiceName("testService").build();
+
+    com.google.protobuf.Duration duration = Duration.newBuilder().setNanos(4000).build();
+    Span span = Span.newBuilder().setProcess(process).setDuration(duration).build();
+    RawSpan rawSpan = normalizer.convert(tenantId, span);
+    MetricValue metricValue = rawSpan.getEvent().getMetrics().getMetricMap().get("DurationPrecise");
+    Assertions.assertEquals(4000.0, metricValue.getValue());
+
+    duration = Duration.newBuilder().setSeconds(253402300799L).setNanos(999999999).build();
+    span = Span.newBuilder().setProcess(process).setDuration(duration).build();
+    rawSpan = normalizer.convert(tenantId, span);
+    metricValue = rawSpan.getEvent().getMetrics().getMetricMap().get("DurationPrecise");
+    Assertions.assertEquals((999999999.0 + 253402300799.0), metricValue.getValue());
+  }
 }
