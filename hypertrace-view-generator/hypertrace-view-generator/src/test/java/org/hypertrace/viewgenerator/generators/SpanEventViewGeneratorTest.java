@@ -56,20 +56,20 @@ public class SpanEventViewGeneratorTest {
   @Test
   public void test_getRequestUrl_httpProtocol_shouldReturnFullUrl() {
     Event event =
-            createMockEventWithAttribute(RawSpanConstants.getValue(HTTP_URL), "http://www.example.com");
+        createMockEventWithAttribute(RawSpanConstants.getValue(HTTP_URL), "http://www.example.com");
     assertEquals(
-            "http://www.example.com",
-            spanEventViewGenerator.getRequestUrl(event, Protocol.PROTOCOL_HTTP));
+        "http://www.example.com",
+        spanEventViewGenerator.getRequestUrl(event, Protocol.PROTOCOL_HTTP));
   }
 
   @Test
   public void test_getRequestUrl_httpsProtocol_shouldReturnFullUrl() {
     Event event =
-            createMockEventWithAttribute(
-                    RawSpanConstants.getValue(HTTP_URL), "https://www.example.com");
+        createMockEventWithAttribute(
+            RawSpanConstants.getValue(HTTP_URL), "https://www.example.com");
     assertEquals(
-            "https://www.example.com",
-            spanEventViewGenerator.getRequestUrl(event, Protocol.PROTOCOL_HTTPS));
+        "https://www.example.com",
+        spanEventViewGenerator.getRequestUrl(event, Protocol.PROTOCOL_HTTPS));
   }
 
   @Test
@@ -77,35 +77,35 @@ public class SpanEventViewGeneratorTest {
     Event event = mock(Event.class);
     when(event.getEventName()).thenReturn("Sent.hipstershop.AdService.GetAds");
     assertEquals(
-            "Sent.hipstershop.AdService.GetAds",
-            spanEventViewGenerator.getRequestUrl(event, Protocol.PROTOCOL_GRPC));
+        "Sent.hipstershop.AdService.GetAds",
+        spanEventViewGenerator.getRequestUrl(event, Protocol.PROTOCOL_GRPC));
   }
 
   @Test
   public void test_getRequestUrl_grpcProctol_shouldReturnEnrichedAttribute() {
     Event event = mock(Event.class);
     when(event.getAttributes())
-            .thenReturn(
-                    Attributes.newBuilder()
-                            .setAttributeMap(
-                                    Map.of(
-                                            "grpc.request.url",
-                                            AttributeValue.newBuilder().setValue("Recv.hipstershop.AdService").build()))
-                            .build());
+        .thenReturn(
+            Attributes.newBuilder()
+                .setAttributeMap(
+                    Map.of(
+                        "grpc.request.url",
+                        AttributeValue.newBuilder().setValue("Recv.hipstershop.AdService").build()))
+                .build());
     when(event.getEventName()).thenReturn("Sent.hipstershop.AdService.GetAds");
     assertEquals(
-            "Recv.hipstershop.AdService",
-            spanEventViewGenerator.getRequestUrl(event, Protocol.PROTOCOL_GRPC));
+        "Recv.hipstershop.AdService",
+        spanEventViewGenerator.getRequestUrl(event, Protocol.PROTOCOL_GRPC));
   }
 
   @Test
   public void testGetRequestUrl_fullUrlIsAbsent() {
     Event event =
-            createMockEventWithAttribute(
-                    RawSpanConstants.getValue(HTTP_PATH), "/api/v1/gatekeeper/check");
+        createMockEventWithAttribute(
+            RawSpanConstants.getValue(HTTP_PATH), "/api/v1/gatekeeper/check");
     assertEquals(
-            "/api/v1/gatekeeper/check",
-            spanEventViewGenerator.getRequestUrl(event, Protocol.PROTOCOL_HTTP));
+        "/api/v1/gatekeeper/check",
+        spanEventViewGenerator.getRequestUrl(event, Protocol.PROTOCOL_HTTP));
   }
 
   @Test
@@ -118,40 +118,40 @@ public class SpanEventViewGeneratorTest {
   public void testGetRequestUrl() {
     Event e = mock(Event.class);
     when(e.getAttributes())
-            .thenReturn(
-                    Attributes.newBuilder()
-                            .setAttributeMap(
-                                    Map.of(
-                                            "http.server_name",
-                                            AttributeValue.newBuilder().setValue("0.0.0.0").build(),
-                                            "net.host.port",
-                                            AttributeValue.newBuilder().setValue("8000").build(),
-                                            "http.route",
-                                            AttributeValue.newBuilder().setValue("/list").build(),
-                                            "http.method",
-                                            AttributeValue.newBuilder().setValue("GET").build(),
-                                            "http.scheme",
-                                            AttributeValue.newBuilder().setValue("http").build(),
-                                            "http.host",
-                                            AttributeValue.newBuilder().setValue("34.33.33.33:8000").build(),
-                                            "http.target",
-                                            AttributeValue.newBuilder().setValue("/list?url=www.google.com").build()))
-                            .build());
+        .thenReturn(
+            Attributes.newBuilder()
+                .setAttributeMap(
+                    Map.of(
+                        "http.server_name",
+                        AttributeValue.newBuilder().setValue("0.0.0.0").build(),
+                        "net.host.port",
+                        AttributeValue.newBuilder().setValue("8000").build(),
+                        "http.route",
+                        AttributeValue.newBuilder().setValue("/list").build(),
+                        "http.method",
+                        AttributeValue.newBuilder().setValue("GET").build(),
+                        "http.scheme",
+                        AttributeValue.newBuilder().setValue("http").build(),
+                        "http.host",
+                        AttributeValue.newBuilder().setValue("34.33.33.33:8000").build(),
+                        "http.target",
+                        AttributeValue.newBuilder().setValue("/list?url=www.google.com").build()))
+                .build());
 
     Assertions.assertEquals(
-            "http://34.33.33.33:8000/list?url=www.google.com",
-            spanEventViewGenerator.getRequestUrl(e, Protocol.PROTOCOL_HTTP));
+        "http://34.33.33.33:8000/list?url=www.google.com",
+        spanEventViewGenerator.getRequestUrl(e, Protocol.PROTOCOL_HTTP));
   }
 
   @Test
   public void testSpanEventViewGen_HotrodTrace() throws IOException {
     URL resource =
-            Thread.currentThread().getContextClassLoader().getResource("StructuredTrace-Hotrod.avro");
+        Thread.currentThread().getContextClassLoader().getResource("StructuredTrace-Hotrod.avro");
 
     SpecificDatumReader<StructuredTrace> datumReader =
-            new SpecificDatumReader<>(StructuredTrace.getClassSchema());
+        new SpecificDatumReader<>(StructuredTrace.getClassSchema());
     DataFileReader<StructuredTrace> dfrStructuredTrace =
-            new DataFileReader<>(new File(resource.getPath()), datumReader);
+        new DataFileReader<>(new File(resource.getPath()), datumReader);
     StructuredTrace trace = dfrStructuredTrace.next();
     dfrStructuredTrace.close();
 
@@ -163,54 +163,54 @@ public class SpanEventViewGeneratorTest {
   }
 
   private void verifyGetExitSpanToApiEntrySpan_HotrodTrace(
-          StructuredTrace trace, TraceState traceState) {
+      StructuredTrace trace, TraceState traceState) {
     Map<ByteBuffer, Event> exitSpanToApiEntrySpanMap =
-            spanEventViewGenerator.getExitSpanToCalleeApiEntrySpanMap(
-                    trace.getEventList(), traceState.getChildToParentEventIds(),
-                    traceState.getParentToChildrenEventIds(), traceState.getEventMap());
+        spanEventViewGenerator.getExitSpanToCalleeApiEntrySpanMap(
+            trace.getEventList(), traceState.getChildToParentEventIds(),
+            traceState.getParentToChildrenEventIds(), traceState.getEventMap());
 
     // verify for all entries in the map, key is exit span and value is entry api boundary
     exitSpanToApiEntrySpanMap.forEach(
-            (key, value) -> {
-              EnrichedSpanUtils.isExitSpan(traceState.getEventMap().get(key));
-              EnrichedSpanUtils.isEntryApiBoundary(value);
-            });
+        (key, value) -> {
+          EnrichedSpanUtils.isExitSpan(traceState.getEventMap().get(key));
+          EnrichedSpanUtils.isEntryApiBoundary(value);
+        });
   }
 
   @Test
   public void testExitCallsInfo() {
     StructuredTrace.Builder traceBuilder = StructuredTrace.newBuilder();
     traceBuilder
-            .setCustomerId("customer1")
-            .setTraceId(ByteBuffer.wrap("sample-trace-id".getBytes()))
-            .setEntityList(
-                    Collections.singletonList(
-                            Entity.newBuilder()
-                                    .setCustomerId("customer1")
-                                    .setEntityId("sample-entity-id")
-                                    .setEntityName("sample-entity-name")
-                                    .setEntityType("SERVICE")
-                                    .build()))
-            .setEventList(
-                    Collections.singletonList(
-                            Event.newBuilder()
-                                    .setCustomerId("customer1")
-                                    .setEventId(ByteBuffer.wrap("sample-span-id".getBytes()))
-                                    .setEventName("sample-span-name")
-                                    .setEntityIdList(Collections.singletonList("sample-entity-id"))
-                                    .setStartTimeMillis(System.currentTimeMillis())
-                                    .setEndTimeMillis(System.currentTimeMillis())
-                                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
-                                    .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
-                                    .setEnrichedAttributesBuilder(
-                                            Attributes.newBuilder().setAttributeMap(Maps.newHashMap()))
-                                    .build()))
-            .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
-            .setEntityEdgeList(new ArrayList<>())
-            .setEventEdgeList(new ArrayList<>())
-            .setEntityEventEdgeList(new ArrayList<>())
-            .setStartTimeMillis(System.currentTimeMillis())
-            .setEndTimeMillis(System.currentTimeMillis());
+        .setCustomerId("customer1")
+        .setTraceId(ByteBuffer.wrap("sample-trace-id".getBytes()))
+        .setEntityList(
+            Collections.singletonList(
+                Entity.newBuilder()
+                    .setCustomerId("customer1")
+                    .setEntityId("sample-entity-id")
+                    .setEntityName("sample-entity-name")
+                    .setEntityType("SERVICE")
+                    .build()))
+        .setEventList(
+            Collections.singletonList(
+                Event.newBuilder()
+                    .setCustomerId("customer1")
+                    .setEventId(ByteBuffer.wrap("sample-span-id".getBytes()))
+                    .setEventName("sample-span-name")
+                    .setEntityIdList(Collections.singletonList("sample-entity-id"))
+                    .setStartTimeMillis(System.currentTimeMillis())
+                    .setEndTimeMillis(System.currentTimeMillis())
+                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+                    .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
+                    .setEnrichedAttributesBuilder(
+                        Attributes.newBuilder().setAttributeMap(Maps.newHashMap()))
+                    .build()))
+        .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+        .setEntityEdgeList(new ArrayList<>())
+        .setEventEdgeList(new ArrayList<>())
+        .setEntityEventEdgeList(new ArrayList<>())
+        .setStartTimeMillis(System.currentTimeMillis())
+        .setEndTimeMillis(System.currentTimeMillis());
 
     StructuredTrace trace = traceBuilder.build();
     SpanEventViewGenerator spanEventViewGenerator = new SpanEventViewGenerator();
@@ -220,33 +220,33 @@ public class SpanEventViewGeneratorTest {
 
     Map<String, AttributeValue> spanAttributes = new HashMap<>();
     spanAttributes.put(
-            EnrichedSpanConstants.API_EXIT_CALLS_ATTRIBUTE,
-            AttributeValue.newBuilder().setValue("5").build());
+        EnrichedSpanConstants.API_EXIT_CALLS_ATTRIBUTE,
+        AttributeValue.newBuilder().setValue("5").build());
     Map<String, String> calleeNameCount = Map.of("service1", "5", "backend1", "2");
     spanAttributes.put(
-            EnrichedSpanConstants.API_CALLEE_NAME_COUNT_ATTRIBUTE,
-            AttributeValue.newBuilder().setValueMap(calleeNameCount).build());
+        EnrichedSpanConstants.API_CALLEE_NAME_COUNT_ATTRIBUTE,
+        AttributeValue.newBuilder().setValueMap(calleeNameCount).build());
     spanAttributes.put(
-            EnrichedSpanConstants.getValue(Api.API_BOUNDARY_TYPE),
-            AttributeValueCreator.create(
-                    EnrichedSpanConstants.getValue(BoundaryTypeValue.BOUNDARY_TYPE_VALUE_ENTRY)));
+        EnrichedSpanConstants.getValue(Api.API_BOUNDARY_TYPE),
+        AttributeValueCreator.create(
+            EnrichedSpanConstants.getValue(BoundaryTypeValue.BOUNDARY_TYPE_VALUE_ENTRY)));
 
     traceBuilder
-            .setEventList(
-                    Collections.singletonList(
-                            Event.newBuilder()
-                                    .setCustomerId("customer1")
-                                    .setEventId(ByteBuffer.wrap("sample-span-id".getBytes()))
-                                    .setEventName("sample-span-name")
-                                    .setEntityIdList(Collections.singletonList("sample-entity-id"))
-                                    .setStartTimeMillis(System.currentTimeMillis())
-                                    .setEndTimeMillis(System.currentTimeMillis())
-                                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
-                                    .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
-                                    .setEnrichedAttributesBuilder(
-                                            Attributes.newBuilder().setAttributeMap(spanAttributes))
-                                    .build()))
-            .build();
+        .setEventList(
+            Collections.singletonList(
+                Event.newBuilder()
+                    .setCustomerId("customer1")
+                    .setEventId(ByteBuffer.wrap("sample-span-id".getBytes()))
+                    .setEventName("sample-span-name")
+                    .setEntityIdList(Collections.singletonList("sample-entity-id"))
+                    .setStartTimeMillis(System.currentTimeMillis())
+                    .setEndTimeMillis(System.currentTimeMillis())
+                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+                    .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
+                    .setEnrichedAttributesBuilder(
+                        Attributes.newBuilder().setAttributeMap(spanAttributes))
+                    .build()))
+        .build();
 
     trace = traceBuilder.build();
     spanEventViewGenerator = new SpanEventViewGenerator();
@@ -259,36 +259,36 @@ public class SpanEventViewGeneratorTest {
   public void testApiTraceErrorSpanCount() {
     StructuredTrace.Builder traceBuilder = StructuredTrace.newBuilder();
     traceBuilder
-            .setCustomerId("customer1")
-            .setTraceId(ByteBuffer.wrap("sample-trace-id".getBytes()))
-            .setEntityList(
-                    Collections.singletonList(
-                            Entity.newBuilder()
-                                    .setCustomerId("customer1")
-                                    .setEntityId("sample-entity-id")
-                                    .setEntityName("sample-entity-name")
-                                    .setEntityType("SERVICE")
-                                    .build()))
-            .setEventList(
-                    Collections.singletonList(
-                            Event.newBuilder()
-                                    .setCustomerId("customer1")
-                                    .setEventId(ByteBuffer.wrap("sample-span-id".getBytes()))
-                                    .setEventName("sample-span-name")
-                                    .setEntityIdList(Collections.singletonList("sample-entity-id"))
-                                    .setStartTimeMillis(System.currentTimeMillis())
-                                    .setEndTimeMillis(System.currentTimeMillis())
-                                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
-                                    .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
-                                    .setEnrichedAttributesBuilder(
-                                            Attributes.newBuilder().setAttributeMap(Maps.newHashMap()))
-                                    .build()))
-            .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
-            .setEntityEdgeList(new ArrayList<>())
-            .setEventEdgeList(new ArrayList<>())
-            .setEntityEventEdgeList(new ArrayList<>())
-            .setStartTimeMillis(System.currentTimeMillis())
-            .setEndTimeMillis(System.currentTimeMillis());
+        .setCustomerId("customer1")
+        .setTraceId(ByteBuffer.wrap("sample-trace-id".getBytes()))
+        .setEntityList(
+            Collections.singletonList(
+                Entity.newBuilder()
+                    .setCustomerId("customer1")
+                    .setEntityId("sample-entity-id")
+                    .setEntityName("sample-entity-name")
+                    .setEntityType("SERVICE")
+                    .build()))
+        .setEventList(
+            Collections.singletonList(
+                Event.newBuilder()
+                    .setCustomerId("customer1")
+                    .setEventId(ByteBuffer.wrap("sample-span-id".getBytes()))
+                    .setEventName("sample-span-name")
+                    .setEntityIdList(Collections.singletonList("sample-entity-id"))
+                    .setStartTimeMillis(System.currentTimeMillis())
+                    .setEndTimeMillis(System.currentTimeMillis())
+                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+                    .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
+                    .setEnrichedAttributesBuilder(
+                        Attributes.newBuilder().setAttributeMap(Maps.newHashMap()))
+                    .build()))
+        .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+        .setEntityEdgeList(new ArrayList<>())
+        .setEventEdgeList(new ArrayList<>())
+        .setEntityEventEdgeList(new ArrayList<>())
+        .setStartTimeMillis(System.currentTimeMillis())
+        .setEndTimeMillis(System.currentTimeMillis());
 
     StructuredTrace trace = traceBuilder.build();
     SpanEventViewGenerator spanEventViewGenerator = new SpanEventViewGenerator();
@@ -297,25 +297,25 @@ public class SpanEventViewGeneratorTest {
 
     Map<String, AttributeValue> spanAttributes = new HashMap<>();
     spanAttributes.put(
-            EnrichedSpanConstants.API_TRACE_ERROR_SPAN_COUNT_ATTRIBUTE,
-            AttributeValue.newBuilder().setValue("5").build());
+        EnrichedSpanConstants.API_TRACE_ERROR_SPAN_COUNT_ATTRIBUTE,
+        AttributeValue.newBuilder().setValue("5").build());
 
     traceBuilder
-            .setEventList(
-                    Collections.singletonList(
-                            Event.newBuilder()
-                                    .setCustomerId("customer1")
-                                    .setEventId(ByteBuffer.wrap("sample-span-id".getBytes()))
-                                    .setEventName("sample-span-name")
-                                    .setEntityIdList(Collections.singletonList("sample-entity-id"))
-                                    .setStartTimeMillis(System.currentTimeMillis())
-                                    .setEndTimeMillis(System.currentTimeMillis())
-                                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
-                                    .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
-                                    .setEnrichedAttributesBuilder(
-                                            Attributes.newBuilder().setAttributeMap(spanAttributes))
-                                    .build()))
-            .build();
+        .setEventList(
+            Collections.singletonList(
+                Event.newBuilder()
+                    .setCustomerId("customer1")
+                    .setEventId(ByteBuffer.wrap("sample-span-id".getBytes()))
+                    .setEventName("sample-span-name")
+                    .setEntityIdList(Collections.singletonList("sample-entity-id"))
+                    .setStartTimeMillis(System.currentTimeMillis())
+                    .setEndTimeMillis(System.currentTimeMillis())
+                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+                    .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(new HashMap<>()))
+                    .setEnrichedAttributesBuilder(
+                        Attributes.newBuilder().setAttributeMap(spanAttributes))
+                    .build()))
+        .build();
 
     trace = traceBuilder.build();
     spanEventViewGenerator = new SpanEventViewGenerator();
@@ -335,10 +335,10 @@ public class SpanEventViewGeneratorTest {
   private Event createMockEventWithAttribute(String key, String value) {
     Event e = mock(Event.class);
     when(e.getAttributes())
-            .thenReturn(
-                    Attributes.newBuilder()
-                            .setAttributeMap(Map.of(key, AttributeValue.newBuilder().setValue(value).build()))
-                            .build());
+        .thenReturn(
+            Attributes.newBuilder()
+                .setAttributeMap(Map.of(key, AttributeValue.newBuilder().setValue(value).build()))
+                .build());
     when(e.getEnrichedAttributes()).thenReturn(null);
     return e;
   }
