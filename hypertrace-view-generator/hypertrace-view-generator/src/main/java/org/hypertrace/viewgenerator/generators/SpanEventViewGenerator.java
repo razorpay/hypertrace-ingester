@@ -3,7 +3,6 @@ package org.hypertrace.viewgenerator.generators;
 import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
 import static org.hypertrace.core.datamodel.shared.SpanAttributeUtils.getStringAttribute;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +14,6 @@ import org.hypertrace.core.datamodel.Entity;
 import org.hypertrace.core.datamodel.Event;
 import org.hypertrace.core.datamodel.MetricValue;
 import org.hypertrace.core.datamodel.StructuredTrace;
-import org.hypertrace.core.datamodel.shared.HexUtils;
 import org.hypertrace.core.datamodel.shared.SpanAttributeUtils;
 import org.hypertrace.semantic.convention.utils.http.HttpSemanticConventionUtils;
 import org.hypertrace.traceenricher.enrichedspan.constants.EnrichedSpanConstants;
@@ -30,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SpanEventViewGenerator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SpanEventViewGenerator.class);
 
   private static final String ERROR_COUNT_CONSTANT =
       EnrichedSpanConstants.getValue(ErrorMetrics.ERROR_METRICS_ERROR_COUNT);
@@ -139,135 +137,135 @@ public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
 
     SpanEventView.Builder builder = fastNewBuilder(SpanEventView.Builder.class);
 
-    builder.setTenantId(event.getCustomerId());
-    builder.setSpanId(event.getEventId());
-    builder.setEventName(event.getEventName());
-
-    // api_trace_id
-    ByteBuffer apiEntrySpanId =
-        EnrichedSpanUtils.getApiEntrySpanId(event, eventMap, childToParentEventIds);
-
-    builder.setApiTraceId(apiEntrySpanId);
-    if (event.getEventId().equals(apiEntrySpanId)) {
-      // set this count to 1 only if this span is the head of the Api Trace
-      builder.setApiTraceCount(1);
-      if (SpanAttributeUtils.containsAttributeKey(
-          event, EnrichedSpanConstants.API_CALLEE_NAME_COUNT_ATTRIBUTE)) {
-        builder.setApiCalleeNameCount(
-            SpanAttributeUtils.getAttributeValue(
-                    event, EnrichedSpanConstants.API_CALLEE_NAME_COUNT_ATTRIBUTE)
-                .getValueMap());
-      }
-    } else {
-      builder.setApiTraceCount(0);
-    }
-
-    // span_type
-    String spanType =
-        getStringAttribute(
-            event, EnrichedSpanConstants.getValue(CommonAttribute.COMMON_ATTRIBUTE_SPAN_TYPE));
-    if (spanType != null) {
-      builder.setSpanKind(spanType);
-    }
-
-    // parent_span_id
-    ByteBuffer parentEventId = childToParentEventIds.get(event.getEventId());
-    if (parentEventId != null) {
-      builder.setParentSpanId(parentEventId);
-    }
-
-    // trace_id
-    builder.setTraceId(traceId);
-
-    // service_id, service_name
-    builder.setServiceId(EnrichedSpanUtils.getServiceId(event));
-    builder.setServiceName(EnrichedSpanUtils.getServiceName(event));
-
-    // api_id, api_name, api_discovery_state
-    builder.setApiId(EnrichedSpanUtils.getApiId(event));
-    builder.setApiName(EnrichedSpanUtils.getApiName(event));
-    builder.setApiDiscoveryState(EnrichedSpanUtils.getApiDiscoveryState(event));
-
-    // entry_api_id
-    Event entryApiSpan = EnrichedSpanUtils.getApiEntrySpan(event, eventMap, childToParentEventIds);
-    if (entryApiSpan != null) {
-      builder.setEntryApiId(EnrichedSpanUtils.getApiId(entryApiSpan));
-    }
-
-    // display entity and span names
-    builder.setDisplayEntityName(getDisplayEntityName(event, exitSpanToCalleeApiEntrySpanMap));
-    builder.setDisplaySpanName(getDisplaySpanName(event, exitSpanToCalleeApiEntrySpanMap));
-
-    // protocol_name
-    Protocol protocol = EnrichedSpanUtils.getProtocol(event);
-    if (protocol == null || protocol == Protocol.PROTOCOL_UNSPECIFIED) {
-      /* In the view, we want to replace unknown with empty string instead
-       * for better representation in the UI and easier to filter */
-      builder.setProtocolName(EMPTY_STRING);
-    } else {
-      builder.setProtocolName(EnrichedSpanConstants.getValue(protocol));
-    }
-
-    builder.setTags(getAttributeMap(event.getAttributes()));
-
     try {
+
+      builder.setTenantId(event.getCustomerId());
+      builder.setSpanId(event.getEventId());
+      builder.setEventName(event.getEventName());
+
+      // api_trace_id
+      ByteBuffer apiEntrySpanId =
+          EnrichedSpanUtils.getApiEntrySpanId(event, eventMap, childToParentEventIds);
+
+      builder.setApiTraceId(apiEntrySpanId);
+      if (event.getEventId().equals(apiEntrySpanId)) {
+        // set this count to 1 only if this span is the head of the Api Trace
+        builder.setApiTraceCount(1);
+        if (SpanAttributeUtils.containsAttributeKey(
+            event, EnrichedSpanConstants.API_CALLEE_NAME_COUNT_ATTRIBUTE)) {
+          builder.setApiCalleeNameCount(
+              SpanAttributeUtils.getAttributeValue(
+                      event, EnrichedSpanConstants.API_CALLEE_NAME_COUNT_ATTRIBUTE)
+                  .getValueMap());
+        }
+      } else {
+        builder.setApiTraceCount(0);
+      }
+
+      // span_type
+      String spanType =
+          getStringAttribute(
+              event, EnrichedSpanConstants.getValue(CommonAttribute.COMMON_ATTRIBUTE_SPAN_TYPE));
+      if (spanType != null) {
+        builder.setSpanKind(spanType);
+      }
+
+      // parent_span_id
+      ByteBuffer parentEventId = childToParentEventIds.get(event.getEventId());
+      if (parentEventId != null) {
+        builder.setParentSpanId(parentEventId);
+      }
+
+      // trace_id
+      builder.setTraceId(traceId);
+
+      // service_id, service_name
+      builder.setServiceId(EnrichedSpanUtils.getServiceId(event));
+      builder.setServiceName(EnrichedSpanUtils.getServiceName(event));
+
+      // api_id, api_name, api_discovery_state
+      builder.setApiId(EnrichedSpanUtils.getApiId(event));
+      builder.setApiName(EnrichedSpanUtils.getApiName(event));
+      builder.setApiDiscoveryState(EnrichedSpanUtils.getApiDiscoveryState(event));
+
+      // entry_api_id
+      Event entryApiSpan =
+          EnrichedSpanUtils.getApiEntrySpan(event, eventMap, childToParentEventIds);
+      if (entryApiSpan != null) {
+        builder.setEntryApiId(EnrichedSpanUtils.getApiId(entryApiSpan));
+      }
+
+      // display entity and span names
+      builder.setDisplayEntityName(getDisplayEntityName(event, exitSpanToCalleeApiEntrySpanMap));
+      builder.setDisplaySpanName(getDisplaySpanName(event, exitSpanToCalleeApiEntrySpanMap));
+
+      // protocol_name
+      Protocol protocol = EnrichedSpanUtils.getProtocol(event);
+      if (protocol == null || protocol == Protocol.PROTOCOL_UNSPECIFIED) {
+        /* In the view, we want to replace unknown with empty string instead
+         * for better representation in the UI and easier to filter */
+        builder.setProtocolName(EMPTY_STRING);
+      } else {
+        builder.setProtocolName(EnrichedSpanConstants.getValue(protocol));
+      }
+
+      builder.setTags(getAttributeMap(event.getAttributes()));
+
       builder.setTagsJson(OBJECT_MAPPER.writeValueAsString(getAttributeMap(event.getAttributes())));
-    } catch (JsonProcessingException e) {
-      LOGGER.error(
-          "Error serialising attributes map to json for event {}",
-          HexUtils.getHex(event.getEventId()),
-          e);
+
+      // request_url
+      builder.setRequestUrl(getRequestUrl(event, protocol));
+
+      // status_code
+      builder.setStatusCode(EnrichedSpanUtils.getStatusCode(event));
+      builder.setStatus(EnrichedSpanUtils.getStatus(event));
+      builder.setStatusMessage(EnrichedSpanUtils.getStatusMessage(event));
+      // set boundary type with default value as empty string to avoid null value
+      builder.setApiBoundaryType(
+          getStringAttribute(event, EnrichedSpanConstants.getValue(Api.API_BOUNDARY_TYPE)));
+
+      // start_time_millis, end_time_millis, duration_millis
+      builder.setStartTimeMillis(event.getStartTimeMillis());
+      builder.setEndTimeMillis(event.getEndTimeMillis());
+      builder.setDurationMillis(event.getEndTimeMillis() - event.getStartTimeMillis());
+
+      // internal duration
+      double internal_duration =
+          getMetricValue(event, EnrichedSpanConstants.API_INTERNAL_DURATION, -1);
+
+      if (internal_duration != -1) {
+        builder.setInternalDurationMillis((long) internal_duration);
+      }
+
+      // error count
+      MetricValue errorMetric = event.getMetrics().getMetricMap().get(ERROR_COUNT_CONSTANT);
+      if (errorMetric != null && errorMetric.getValue() > 0.0d) {
+        builder.setErrorCount((int) errorMetric.getValue().doubleValue());
+      }
+
+      builder.setSpans(1);
+
+      MetricValue exceptionMetric = event.getMetrics().getMetricMap().get(EXCEPTION_COUNT_CONSTANT);
+      if (exceptionMetric != null && exceptionMetric.getValue() > 0.0d) {
+        builder.setExceptionCount((int) exceptionMetric.getValue().doubleValue());
+      }
+
+      builder.setSpaceIds(EnrichedSpanUtils.getSpaceIds(event));
+
+      builder.setApiExitCalls(
+          Integer.parseInt(
+              SpanAttributeUtils.getStringAttributeWithDefault(
+                  event, EnrichedSpanConstants.API_EXIT_CALLS_ATTRIBUTE, "0")));
+
+      builder.setApiTraceErrorSpanCount(
+          Integer.parseInt(
+              SpanAttributeUtils.getStringAttributeWithDefault(
+                  event, EnrichedSpanConstants.API_TRACE_ERROR_SPAN_COUNT_ATTRIBUTE, "0")));
+
+      return builder;
+    } catch (Exception e) {
+      LOG.error(String.format("Failed to generate spanEventView from Event: %s", event), e);
     }
-
-    // request_url
-    builder.setRequestUrl(getRequestUrl(event, protocol));
-
-    // status_code
-    builder.setStatusCode(EnrichedSpanUtils.getStatusCode(event));
-    builder.setStatus(EnrichedSpanUtils.getStatus(event));
-    builder.setStatusMessage(EnrichedSpanUtils.getStatusMessage(event));
-    // set boundary type with default value as empty string to avoid null value
-    builder.setApiBoundaryType(
-        getStringAttribute(event, EnrichedSpanConstants.getValue(Api.API_BOUNDARY_TYPE)));
-
-    // start_time_millis, end_time_millis, duration_millis
-    builder.setStartTimeMillis(event.getStartTimeMillis());
-    builder.setEndTimeMillis(event.getEndTimeMillis());
-    builder.setDurationMillis(event.getEndTimeMillis() - event.getStartTimeMillis());
-
-    // internal duration
-    double internal_duration =
-        getMetricValue(event, EnrichedSpanConstants.API_INTERNAL_DURATION, -1);
-
-    if (internal_duration != -1) {
-      builder.setInternalDurationMillis((long) internal_duration);
-    }
-
-    // error count
-    MetricValue errorMetric = event.getMetrics().getMetricMap().get(ERROR_COUNT_CONSTANT);
-    if (errorMetric != null && errorMetric.getValue() > 0.0d) {
-      builder.setErrorCount((int) errorMetric.getValue().doubleValue());
-    }
-
-    builder.setSpans(1);
-
-    MetricValue exceptionMetric = event.getMetrics().getMetricMap().get(EXCEPTION_COUNT_CONSTANT);
-    if (exceptionMetric != null && exceptionMetric.getValue() > 0.0d) {
-      builder.setExceptionCount((int) exceptionMetric.getValue().doubleValue());
-    }
-
-    builder.setSpaceIds(EnrichedSpanUtils.getSpaceIds(event));
-
-    builder.setApiExitCalls(
-        Integer.parseInt(
-            SpanAttributeUtils.getStringAttributeWithDefault(
-                event, EnrichedSpanConstants.API_EXIT_CALLS_ATTRIBUTE, "0")));
-
-    builder.setApiTraceErrorSpanCount(
-        Integer.parseInt(
-            SpanAttributeUtils.getStringAttributeWithDefault(
-                event, EnrichedSpanConstants.API_TRACE_ERROR_SPAN_COUNT_ATTRIBUTE, "0")));
-
     return builder;
   }
 

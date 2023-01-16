@@ -52,6 +52,8 @@ protocol BackendEntityViewProtocol {
     // key:value pairs of all the associated tags to this span
     map<string> tags = {};
 
+    union {null, string} tags_json = null;
+
     // this span is associated to service if any
     union { null, string } caller_service_id = null;
 

@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,6 +19,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.hypertrace.core.datamodel.AttributeValue;
@@ -40,6 +44,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class SpanEventViewGeneratorTest {
+
+  private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   private SpanEventViewGenerator spanEventViewGenerator;
 
   @BeforeEach
@@ -178,7 +185,7 @@ public class SpanEventViewGeneratorTest {
   }
 
   @Test
-  public void testExitCallsInfo() {
+  public void testExitCallsInfo() throws JsonProcessingException {
     StructuredTrace.Builder traceBuilder = StructuredTrace.newBuilder();
     traceBuilder
         .setCustomerId("customer1")
@@ -321,6 +328,61 @@ public class SpanEventViewGeneratorTest {
     spanEventViewGenerator = new SpanEventViewGenerator();
     list = spanEventViewGenerator.process(trace);
     assertEquals(5, list.get(0).getApiTraceErrorSpanCount());
+  }
+
+  @Test
+  public void testApiTraceTagsJson() throws JsonProcessingException {
+    StructuredTrace.Builder traceBuilder = StructuredTrace.newBuilder();
+    Map<String, AttributeValue> eventAttributes = new HashMap<>();
+    eventAttributes.put(
+        EnrichedSpanConstants.API_EXIT_CALLS_ATTRIBUTE,
+        AttributeValue.newBuilder().setValue("5").build());
+    eventAttributes.put(
+        EnrichedSpanConstants.getValue(Api.API_BOUNDARY_TYPE),
+        AttributeValueCreator.create(
+            EnrichedSpanConstants.getValue(BoundaryTypeValue.BOUNDARY_TYPE_VALUE_ENTRY)));
+    traceBuilder
+        .setCustomerId("customer1")
+        .setTraceId(ByteBuffer.wrap("sample-trace-id".getBytes()))
+        .setEntityList(
+            Collections.singletonList(
+                Entity.newBuilder()
+                    .setCustomerId("customer1")
+                    .setEntityId("sample-entity-id")
+                    .setEntityName("sample-entity-name")
+                    .setEntityType("SERVICE")
+                    .build()))
+        .setEventList(
+            Collections.singletonList(
+                Event.newBuilder()
+                    .setCustomerId("customer1")
+                    .setEventId(ByteBuffer.wrap("sample-span-id".getBytes()))
+                    .setEventName("sample-span-name")
+                    .setEntityIdList(Collections.singletonList("sample-entity-id"))
+                    .setStartTimeMillis(System.currentTimeMillis())
+                    .setEndTimeMillis(System.currentTimeMillis())
+                    .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+                    .setAttributesBuilder(Attributes.newBuilder().setAttributeMap(eventAttributes))
+                    .setEnrichedAttributesBuilder(
+                        Attributes.newBuilder().setAttributeMap(Maps.newHashMap()))
+                    .build()))
+        .setMetrics(Metrics.newBuilder().setMetricMap(new HashMap<>()).build())
+        .setEntityEdgeList(new ArrayList<>())
+        .setEventEdgeList(new ArrayList<>())
+        .setEntityEventEdgeList(new ArrayList<>())
+        .setStartTimeMillis(System.currentTimeMillis())
+        .setEndTimeMillis(System.currentTimeMillis());
+
+    StructuredTrace trace = traceBuilder.build();
+    SpanEventViewGenerator spanEventViewGenerator = new SpanEventViewGenerator();
+    List<SpanEventView> list = spanEventViewGenerator.process(trace);
+
+    Map<String, String> eventAttributesMap =
+        eventAttributes.entrySet().stream()
+            .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getValue()));
+    assertEquals(
+        OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(eventAttributesMap)),
+        OBJECT_MAPPER.readTree(list.get(0).getTagsJson()));
   }
 
   @Test
