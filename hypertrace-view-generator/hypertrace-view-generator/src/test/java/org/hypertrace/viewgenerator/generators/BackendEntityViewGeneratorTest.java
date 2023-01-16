@@ -22,8 +22,7 @@ public class BackendEntityViewGeneratorTest {
     List<BackendEntityView> backendEntityViews = backendEntityViewGenerator.process(trace);
     List<Event> computedBackendEvents = getEventsWithBackendEntity(trace);
     assertEntity(backendEntityViews, computedBackendEvents);
-    backendEntityViews
-        .forEach(event -> Assertions.assertNotNull(event.getTagsJson()));
+    backendEntityViews.forEach(event -> Assertions.assertNotNull(event.getTagsJson()));
   }
 
   private List<Event> getEventsWithBackendEntity(StructuredTrace trace) {
