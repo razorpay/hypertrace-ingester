@@ -1,5 +1,6 @@
 package org.hypertrace.viewgenerator.generators;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Timer;
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -32,6 +33,7 @@ public abstract class BaseViewGenerator<OUT extends GenericRecord>
       PlatformMetricsRegistry.registerTimer(DataflowMetricUtils.ARRIVAL_LAG, new HashMap<>());
 
   static final String EMPTY_STRING = "";
+  static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   static double getMetricValue(Event event, String metricName, double defaultValue) {
     if (event.getMetrics() == null || event.getMetrics().getMetricMap().isEmpty()) {

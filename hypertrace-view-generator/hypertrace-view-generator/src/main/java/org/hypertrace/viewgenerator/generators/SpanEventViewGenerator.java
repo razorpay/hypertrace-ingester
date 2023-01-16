@@ -3,6 +3,7 @@ package org.hypertrace.viewgenerator.generators;
 import static org.hypertrace.core.datamodel.shared.AvroBuilderCache.fastNewBuilder;
 import static org.hypertrace.core.datamodel.shared.SpanAttributeUtils.getStringAttribute;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.hypertrace.core.datamodel.Entity;
 import org.hypertrace.core.datamodel.Event;
 import org.hypertrace.core.datamodel.MetricValue;
 import org.hypertrace.core.datamodel.StructuredTrace;
+import org.hypertrace.core.datamodel.shared.HexUtils;
 import org.hypertrace.core.datamodel.shared.SpanAttributeUtils;
 import org.hypertrace.semantic.convention.utils.http.HttpSemanticConventionUtils;
 import org.hypertrace.traceenricher.enrichedspan.constants.EnrichedSpanConstants;
@@ -23,8 +25,12 @@ import org.hypertrace.traceenricher.enrichedspan.constants.v1.CommonAttribute;
 import org.hypertrace.traceenricher.enrichedspan.constants.v1.ErrorMetrics;
 import org.hypertrace.traceenricher.enrichedspan.constants.v1.Protocol;
 import org.hypertrace.viewgenerator.api.SpanEventView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(SpanEventViewGenerator.class);
 
   private static final String ERROR_COUNT_CONSTANT =
       EnrichedSpanConstants.getValue(ErrorMetrics.ERROR_METRICS_ERROR_COUNT);
@@ -203,6 +209,15 @@ public class SpanEventViewGenerator extends BaseViewGenerator<SpanEventView> {
     }
 
     builder.setTags(getAttributeMap(event.getAttributes()));
+
+    try {
+      builder.setTagsJson(OBJECT_MAPPER.writeValueAsString(getAttributeMap(event.getAttributes())));
+    } catch (JsonProcessingException e) {
+      LOGGER.error(
+          "Error serialising attributes map to json for event {}",
+          HexUtils.getHex(event.getEventId()),
+          e);
+    }
 
     // request_url
     builder.setRequestUrl(getRequestUrl(event, protocol));
