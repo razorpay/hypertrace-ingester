@@ -118,6 +118,8 @@ public class BackendEntityViewGenerator extends BaseViewGenerator<BackendEntityV
 
       builder.setTags(getAttributeMap(event.getAttributes()));
 
+      builder.setTagsJson(OBJECT_MAPPER.writeValueAsString(getAttributeMap(event.getAttributes())));
+
       // this is the same for now
       builder.setDisplayName(event.getEventName());
       // status_code

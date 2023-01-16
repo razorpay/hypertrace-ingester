@@ -34,6 +34,8 @@ protocol SpanEventViewProtocol {
     // key:value pairs of all the associated tags to this span
     map<string> tags = {};
 
+    union {null, string} tags_json = null;
+
     // if this was an api span, result of the request 200, 500, etc
     // Api Trace attribute
     union { null, string } status_code = null;
