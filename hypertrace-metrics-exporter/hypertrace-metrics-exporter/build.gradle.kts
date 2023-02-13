@@ -33,7 +33,7 @@ dependencies {
   implementation("org.hypertrace.core.serviceframework:platform-metrics:0.1.33")
 
   // open telemetry
-  implementation("io.opentelemetry:opentelemetry-sdk-metrics:1.7.0-alpah")
+  implementation("io.opentelemetry:opentelemetry-sdk-metrics:1.23.0")
   // TODO: Upgrade opentelemetry-exporter-prometheus to 1.8.0 release when available
   // to include time stamp related changes
   // https://github.com/open-telemetry/opentelemetry-java/pull/3700
