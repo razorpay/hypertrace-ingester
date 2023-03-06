@@ -390,30 +390,33 @@ public class JaegerSpanNormalizerTest {
     Assertions.assertEquals(4.0, metricValue.getValue());
 
     duration = Duration.newBuilder().setSeconds(4L).setNanos(6230).build();
-    Double expectedDurationMicros = ((duration.getSeconds()*1.0*1e9)+duration.getNanos())/1000.0;
+    Double expectedDurationMicros =
+        ((duration.getSeconds() * 1.0 * 1e9) + duration.getNanos()) / 1000.0;
     span = Span.newBuilder().setProcess(process).setDuration(duration).build();
     rawSpan = normalizer.convert(tenantId, span);
     metricValue = rawSpan.getEvent().getMetrics().getMetricMap().get("DurationMicros");
-    Double delta = Math.abs(metricValue.getValue()-expectedDurationMicros); //Precision loss of less than a microsecond is OK
+    Double delta =
+        Math.abs(
+            metricValue.getValue()
+                - expectedDurationMicros); // Precision loss of less than a microsecond is OK
     Assertions.assertTrue(delta < 1);
 
     duration = Duration.newBuilder().setSeconds(253402300799L).setNanos(999999999).build();
-    expectedDurationMicros = ((duration.getSeconds()*1.0*1e9)+duration.getNanos())/1000.0;
+    expectedDurationMicros = ((duration.getSeconds() * 1.0 * 1e9) + duration.getNanos()) / 1000.0;
     span = Span.newBuilder().setProcess(process).setDuration(duration).build();
     rawSpan = normalizer.convert(tenantId, span);
     metricValue = rawSpan.getEvent().getMetrics().getMetricMap().get("DurationMicros");
-    delta = Math.abs(metricValue.getValue()-expectedDurationMicros);
+    delta = Math.abs(metricValue.getValue() - expectedDurationMicros);
     Assertions.assertTrue(delta < 1);
 
     duration = Duration.newBuilder().setSeconds(0).setNanos(200000000).build();
-    expectedDurationMicros = ((duration.getSeconds()*1.0*1e9)+duration.getNanos())/1000.0;
+    expectedDurationMicros = ((duration.getSeconds() * 1.0 * 1e9) + duration.getNanos()) / 1000.0;
     span = Span.newBuilder().setProcess(process).setDuration(duration).build();
     rawSpan = normalizer.convert(tenantId, span);
     metricValue = rawSpan.getEvent().getMetrics().getMetricMap().get("DurationMicros");
-    delta = Math.abs(metricValue.getValue()-expectedDurationMicros);
+    delta = Math.abs(metricValue.getValue() - expectedDurationMicros);
     Assertions.assertTrue(delta < 1);
     Assertions.assertEquals(0, span.getDuration().getSeconds());
     Assertions.assertEquals(200000000, span.getDuration().getNanos());
-
   }
 }
