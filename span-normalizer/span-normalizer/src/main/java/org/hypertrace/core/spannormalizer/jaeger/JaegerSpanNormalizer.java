@@ -105,7 +105,6 @@ public class JaegerSpanNormalizer {
 
   @Nullable
   public RawSpan convert(String tenantId, Span jaegerSpan) throws Exception {
-    System.out.println("span: "+jaegerSpan);
     Map<String, KeyValue> tags =
         jaegerSpan.getTagsList().stream()
             .collect(Collectors.toMap(t -> t.getKey().toLowerCase(), t -> t, (v1, v2) -> v2));
