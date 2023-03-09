@@ -371,12 +371,12 @@ public class SpanEventViewGeneratorTest {
     SpanEventViewGenerator spanEventViewGenerator = new SpanEventViewGenerator();
     List<SpanEventView> list = spanEventViewGenerator.process(trace);
     assertEquals(1, list.size());
-    Assertions.assertEquals(0.01, list.get(0).getDurationMillisDouble());
+    Assertions.assertEquals(0, list.get(0).getDurationMillisDouble());
 
     list = spanEventViewGenerator.process(TestUtilities.getSampleHotRodTrace());
     Assertions.assertEquals(678.1, list.get(0).getDurationMillisDouble());
     Assertions.assertEquals(298.71, list.get(1).getDurationMillisDouble());
-    Assertions.assertEquals(183.43, list.get(2).getDurationMillisDouble());
+    Assertions.assertEquals(183.42, list.get(2).getDurationMillisDouble());
   }
 
   private Event createMockEventWithAttribute(String key, String value) {

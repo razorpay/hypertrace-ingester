@@ -7,7 +7,7 @@ public class MathUtil {
   private static final DecimalFormat df = new DecimalFormat("#.##");
 
   static {
-    df.setRoundingMode(RoundingMode.HALF_DOWN);
+    df.setRoundingMode(RoundingMode.DOWN);
   }
 
   private static final double NANOSECONDS_PER_MILLISECONDS = 1000000;
