@@ -1,10 +1,14 @@
 package util;
 
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
 public class MathUtil {
-
   private static final DecimalFormat df = new DecimalFormat("#.##");
+  static {
+    df.setRoundingMode(RoundingMode.HALF_DOWN);
+  }
+
   private static final double NANOSECONDS_PER_MILLISECONDS = 1000000;
   private static final double MICROSECONDS_PER_MILLISECONDS = 1000;
 
