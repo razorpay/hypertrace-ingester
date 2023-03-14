@@ -11,7 +11,6 @@ import org.hypertrace.core.datamodel.EventRefType;
 import org.hypertrace.core.datamodel.MetricValue;
 import org.hypertrace.core.datamodel.StructuredTrace;
 import org.hypertrace.core.datamodel.shared.ApiNode;
-import org.hypertrace.core.datamodel.shared.HexUtils;
 import org.hypertrace.core.datamodel.shared.trace.AttributeValueCreator;
 import org.hypertrace.entity.constants.v1.BackendAttribute;
 import org.hypertrace.entity.service.constants.EntityConstants;
@@ -52,11 +51,6 @@ public class ApiNodeInternalDurationEnricher extends AbstractTraceEnricher {
             if (normalizedOutboundEdges.size() > 0) {
               totalWaitTime = calculateTotalWaitTime(normalizedOutboundEdges);
             }
-            LOG.info(
-                "Enriching event {} with {} val: {}",
-                HexUtils.getHex(entryEvent.getEventId()),
-                EnrichedSpanConstants.API_INTERNAL_DURATION,
-                entryApiBoundaryEventDuration - totalWaitTime);
             enrichEvent(entryEvent, entryApiBoundaryEventDuration, totalWaitTime);
           });
     }
