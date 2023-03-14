@@ -324,7 +324,7 @@ public class SpanEventViewGeneratorTest {
     List<SpanEventView> list = spanEventViewGenerator.process(TestUtilities.getSampleHotRodTrace());
     long internalDurationMillis = list.get(0).getInternalDurationMillis();
     Assertions.assertEquals(678, internalDurationMillis);
-    Assertions.assertNull(list.get(1).getInternalDurationMillis());
+    Assertions.assertEquals(-1, list.get(1).getInternalDurationMillis());
   }
 
   @Test
