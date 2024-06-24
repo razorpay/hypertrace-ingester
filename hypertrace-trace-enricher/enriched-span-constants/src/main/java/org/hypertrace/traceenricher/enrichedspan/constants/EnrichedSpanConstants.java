@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EnrichedSpanConstants {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(EnrichedSpanConstants.class);
 
   public static final String SPACE_IDS_ATTRIBUTE = "SPACE_IDS";
